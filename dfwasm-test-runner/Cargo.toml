@@ -1,0 +1,17 @@
+[package]
+name = "dfwasm-test-runner"
+build = "build/build.rs"
+
+repository.workspace = true
+authors.workspace = true
+license.workspace = true
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+dfwasm-compiler = { path = "../dfwasm-compiler" }
+dfwasm-template = { path = "../dfwasm-template", features = ["codeclient"] }
+tokio = { version = "1.44.2", features = ["rt-multi-thread", "macros"] }
+wasmer = "5.0.4"
+anyhow = "1.0.98"
+glob = "0.3.2"
