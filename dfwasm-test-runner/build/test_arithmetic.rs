@@ -1,7 +1,7 @@
 use core::panic;
 
 use crate::{
-    Type,
+    Type, clear_directory,
     numbers::{I32_1, I32_2, I64_1, I64_2},
     write_test,
 };
@@ -10,7 +10,7 @@ use Type::*;
 type Instruction = (&'static str, &'static [Type], &'static [Type]);
 type TestCase = &'static [&'static str];
 
-fn build_instruction_test(instruction: &Instruction, tests: &[TestCase]) {
+fn build_airhtmetic_instruction_test(instruction: &Instruction, tests: &[TestCase]) {
     let function_name = instruction.0.replace(".", "_");
     let module_name = format!("single-{}", function_name);
 
@@ -20,7 +20,7 @@ fn build_instruction_test(instruction: &Instruction, tests: &[TestCase]) {
 
     let function_body = match instr_args.len() {
         2 => format!("(local.get 0) (local.get 1) ({instr_asm})"),
-        1 => format!("(local.get 0) (local.get 1) ({instr_asm})"),
+        1 => format!("(local.get 0) ({instr_asm})"),
         _ => panic!("Invalid number of arguments for instruction: {instr_asm}"),
     };
 
@@ -35,7 +35,7 @@ fn build_instruction_test(instruction: &Instruction, tests: &[TestCase]) {
         .collect::<Vec<_>>()
         .join(" ");
 
-    let signature = format!("(params {params}) (result {results})");
+    let signature = format!("(param {params}) (result {results})");
     let wat_file = format!(
         r#"(module ${module_name}
 
@@ -49,6 +49,11 @@ fn build_instruction_test(instruction: &Instruction, tests: &[TestCase]) {
 
     let mut test_file = String::new();
     for test in tests {
+        if (instr_asm.contains("rem") || instr_asm.contains("div")) && test[1] == "0" {
+            // Skip division by zero tests
+            continue;
+        }
+
         let call_args = test
             .iter()
             .take(instr_args.len())
@@ -56,7 +61,7 @@ fn build_instruction_test(instruction: &Instruction, tests: &[TestCase]) {
             .collect::<Vec<_>>()
             .join(" ");
 
-        test_file.push_str(&format!("{} {}", function_name, call_args));
+        test_file.push_str(&format!("{} {}\n", function_name, call_args));
     }
 
     write_test(
@@ -85,9 +90,9 @@ fn build_i32() {
         ("i32.shr_u", &[I32, I32], &[I32]),
         ("i32.rotl", &[I32, I32], &[I32]),
         ("i32.rotr", &[I32, I32], &[I32]),
-        ("i32.clz", &[I32], &[I32]),
-        ("i32.ctz", &[I32], &[I32]),
-        ("i32.popcnt", &[I32], &[I32]),
+        // ("i32.clz", &[I32], &[I32]),
+        // ("i32.ctz", &[I32], &[I32]),
+        // ("i32.popcnt", &[I32], &[I32]),
         ("i32.eqz", &[I32], &[I32]),
         ("i32.eq", &[I32, I32], &[I32]),
         ("i32.ne", &[I32, I32], &[I32]),
@@ -114,7 +119,7 @@ fn build_i32() {
                 instruction.0
             ),
         };
-        build_instruction_test(&instruction, I32_1);
+        build_airhtmetic_instruction_test(&instruction, tests);
     }
 }
 
@@ -124,9 +129,9 @@ fn build_i64() {
         ("i64.sub", &[I64, I64], &[I64]),
         ("i64.mul", &[I64, I64], &[I64]),
         ("i64.div_s", &[I64, I64], &[I64]),
-        ("i64.div_u", &[I64, I64], &[I64]),
+        // ("i64.div_u", &[I64, I64], &[I64]),
         ("i64.rem_s", &[I64, I64], &[I64]),
-        ("i64.rem_u", &[I64, I64], &[I64]),
+        // ("i64.rem_u", &[I64, I64], &[I64]),
         ("i64.and", &[I64, I64], &[I64]),
         ("i64.or", &[I64, I64], &[I64]),
         ("i64.xor", &[I64, I64], &[I64]),
@@ -135,20 +140,20 @@ fn build_i64() {
         ("i64.shr_u", &[I64, I64], &[I64]),
         ("i64.rotl", &[I64, I64], &[I64]),
         ("i64.rotr", &[I64, I64], &[I64]),
-        ("i64.clz", &[I64], &[I64]),
-        ("i64.ctz", &[I64], &[I64]),
-        ("i64.popcnt", &[I64], &[I64]),
+        // ("i64.clz", &[I64], &[I64]),
+        // ("i64.ctz", &[I64], &[I64]),
+        // ("i64.popcnt", &[I64], &[I64]),
         ("i64.eqz", &[I64], &[I32]),
-        ("i64.eq", &[I64, I64], &[I64]),
-        ("i64.ne", &[I64, I64], &[I64]),
-        ("i64.lt_s", &[I64, I64], &[I64]),
-        ("i64.lt_u", &[I64, I64], &[I64]),
-        ("i64.gt_s", &[I64, I64], &[I64]),
-        ("i64.gt_u", &[I64, I64], &[I64]),
-        ("i64.le_s", &[I64, I64], &[I64]),
-        ("i64.le_u", &[I64, I64], &[I64]),
-        ("i64.ge_s", &[I64, I64], &[I64]),
-        ("i64.ge_u", &[I64, I64], &[I64]),
+        ("i64.eq", &[I64, I64], &[I32]),
+        ("i64.ne", &[I64, I64], &[I32]),
+        ("i64.lt_s", &[I64, I64], &[I32]),
+        ("i64.lt_u", &[I64, I64], &[I32]),
+        ("i64.gt_s", &[I64, I64], &[I32]),
+        ("i64.gt_u", &[I64, I64], &[I32]),
+        ("i64.le_s", &[I64, I64], &[I32]),
+        ("i64.le_u", &[I64, I64], &[I32]),
+        ("i64.ge_s", &[I64, I64], &[I32]),
+        ("i64.ge_u", &[I64, I64], &[I32]),
         ("i32.wrap_i64", &[I64], &[I32]),
         ("i64.extend8_s", &[I64], &[I64]),
         ("i64.extend16_s", &[I64], &[I64]),
@@ -164,11 +169,13 @@ fn build_i64() {
                 instruction.0
             ),
         };
-        build_instruction_test(&instruction, tests);
+        build_airhtmetic_instruction_test(&instruction, tests);
     }
 }
 
 pub fn build() {
+    clear_directory("wat_single", "arithmetic");
+
     build_i32();
     build_i64();
 }

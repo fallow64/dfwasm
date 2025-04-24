@@ -221,7 +221,6 @@ pub fn compile_numeric_operator(
         Operator::I32Clz => todo!(),
         Operator::I32Ctz => todo!(),
         Operator::I32Popcnt => todo!(),
-
         Operator::I64Clz => todo!(),
         Operator::I64Ctz => todo!(),
         Operator::I64Popcnt => todo!(),

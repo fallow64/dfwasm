@@ -1,0 +1,4 @@
+global_set 0
+global_set 5
+global_set 10
+global_set -10

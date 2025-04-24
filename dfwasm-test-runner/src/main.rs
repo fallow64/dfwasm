@@ -9,7 +9,7 @@ use anyhow::Result;
 use dfwasm_compiler::{DFWasmCompiler, DFWasmCompilerOptions};
 use dfwasm_template::{Args, Item, Location, Template, split_templates};
 use util::{
-    CompiledModuleTest, TestCase, clear_variables, get_wasmer_info, parse_input_file,
+    CompiledModuleTest, TestCase, clear_variables, get_wasmer_results, parse_input_file,
     send_templates_to_cc,
 };
 use wasmer::{Instance, Module, Store, wat2wasm};
@@ -32,7 +32,7 @@ fn compile_test_case(
     store: &mut Store,
     wasmer_instance: &mut Instance,
 ) -> Result<()> {
-    let (df_inputs, df_expected_results) = get_wasmer_info(case, store, wasmer_instance)?;
+    let (df_inputs, df_expected_results) = get_wasmer_results(case, store, wasmer_instance)?;
 
     let mut args = vec![
         Item::string(case.module_name.clone()),
@@ -99,7 +99,8 @@ fn compile_module_test(
 
 fn get_wat_module_test(wat_path: &Path) -> Result<CompiledModuleTest> {
     let wat_contents = fs::read(wat_path)?;
-    let wasm = wat2wasm(&wat_contents).expect("Valid wat file");
+    let wasm = wat2wasm(&wat_contents)
+        .unwrap_or_else(|e| panic!("Invalid wat file {}: {}", wat_path.display(), e));
 
     let module_name = wat_path
         .file_stem()
@@ -123,7 +124,9 @@ async fn main() -> Result<()> {
     for test_file in glob::glob(WAT_GLOB)? {
         let test_file = test_file?;
 
-        let compiled_test = get_wat_module_test(&test_file)?;
+        let compiled_test = get_wat_module_test(&test_file).unwrap_or_else(|e| {
+            panic!("Failed to compile test file {}: {}", test_file.display(), e)
+        });
         compiled_module_tests.push(compiled_test);
     }
 

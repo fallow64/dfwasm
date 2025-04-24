@@ -1,0 +1,8 @@
+local_tee 5
+local_tee 3
+local_tee 19
+local_tee 420
+local_tee -4
+local_tee 3
+local_tee 2147483647
+local_tee -2147483648

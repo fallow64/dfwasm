@@ -1,0 +1,5 @@
+drop 1 3
+drop 0 5
+drop 5 5
+drop 10 20
+drop -5 5

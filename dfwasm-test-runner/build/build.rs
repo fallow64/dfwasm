@@ -7,6 +7,7 @@ mod numbers;
 mod test_arithmetic;
 mod test_memory;
 
+#[derive(Debug, Clone, Copy)]
 pub enum Type {
     I32,
     I64,
@@ -17,6 +18,25 @@ impl fmt::Display for Type {
         match self {
             Type::I32 => write!(f, "i32"),
             Type::I64 => write!(f, "i64"),
+        }
+    }
+}
+
+pub fn clear_directory(direction: &str, subdirectory: &str) {
+    let test_dir = Path::new("test_files").join(direction).join(subdirectory);
+
+    if test_dir.exists() {
+        // delete all .wat, .wasm, and .test files in the directory
+        for entry in fs::read_dir(&test_dir).unwrap() {
+            let entry = entry.unwrap();
+            let path = entry.path();
+
+            if path
+                .extension()
+                .map_or(false, |ext| ext == "wat" || ext == "wasm" || ext == "test")
+            {
+                fs::remove_file(path).unwrap();
+            }
         }
     }
 }

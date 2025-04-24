@@ -15,8 +15,16 @@ pub struct TestCase {
 
 pub fn parse_string_to_wasmer_value(str_value: &str, ty: &wasmer::Type) -> Result<Value> {
     match ty {
-        wasmer::Type::I32 => Ok(Value::from(str_value.parse::<i32>().expect("Invalid i32"))),
-        wasmer::Type::I64 => Ok(Value::from(str_value.parse::<i64>().expect("Invalid i64"))),
+        wasmer::Type::I32 => {
+            Ok(Value::from(str_value.parse::<i32>().unwrap_or_else(|e| {
+                panic!("Invalid i32: {}. Error: {}", str_value, e)
+            })))
+        }
+        wasmer::Type::I64 => {
+            Ok(Value::from(str_value.parse::<i64>().unwrap_or_else(|e| {
+                panic!("Invalid i64: {}. Error: {}", str_value, e)
+            })))
+        }
         _ => Err(anyhow!("Unsupported type")),
     }
 }
@@ -127,7 +135,7 @@ pub fn format_df_number_i32(value: i32) -> String {
 }
 
 /// Returns (inputs, expected results)
-pub fn get_wasmer_info(
+pub fn get_wasmer_results(
     case: &TestCase,
     store: &mut Store,
     wasmer_instance: &mut Instance,
