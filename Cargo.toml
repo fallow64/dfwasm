@@ -1,0 +1,10 @@
+[workspace]
+members = ["dfwasm", "dfwasm-compiler", "dfwasm-template", "dfwasm-test-runner"]
+resolver = "3"
+
+[workspace.package]
+repository = "https://github.com/fallow64/dfwasm"
+authors = ["fallow64"]
+license = "MIT"
+version = "0.1.0"
+edition = "2024"

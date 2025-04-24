@@ -1,0 +1,7 @@
+/target
+/.vscode
+.DS_Store
+doom/
+playground/
+web/
+thoughts.md

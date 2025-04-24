@@ -1,0 +1,23 @@
+[package]
+name = "dfwasm-template"
+repository.workspace = true
+authors.workspace = true
+license.workspace = true
+version.workspace = true
+edition.workspace = true
+
+[features]
+codeclient = ["dep:tokio", "dep:tokio-tungstenite", "dep:futures-util"]
+
+[dependencies]
+
+base64 = "0.22.1"
+flate2 = "1.1.1"
+serde = "1.0.219"
+serde_derive = "1.0.219"
+serde_json = "1.0.140"
+
+tokio = { version = "1.44.2", optional = true }
+tokio-tungstenite = { version = "0.26.2", optional = true }
+futures-util = { version = "0.3.31", optional = true }
+thiserror = "2.0.12"

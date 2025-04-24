@@ -1,0 +1,12 @@
+[package]
+name = "dfwasm-compiler"
+repository.workspace = true
+authors.workspace = true
+license.workspace = true
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+wasmparser = "0.228.0"
+dfwasm-template = { path = "../dfwasm-template" }
+thiserror = "2.0.12"
