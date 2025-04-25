@@ -101,8 +101,6 @@ pub fn format_df_number_i32(value: i32) -> String {
     }
 }
 
-/// Formats a i32 number to a string. See [`format_df_number_i64`] for details.
-
 /// Formats a u64 number to a string. See [`format_df_number_i64`] for details.
 pub fn format_df_number_u64(value: u64) -> String {
     let int_part = value / 1000;

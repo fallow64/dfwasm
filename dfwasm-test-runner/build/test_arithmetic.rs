@@ -57,7 +57,7 @@ fn build_airhtmetic_instruction_test(instruction: &Instruction, tests: &[TestCas
         let call_args = test
             .iter()
             .take(instr_args.len())
-            .map(|arg| *arg)
+            .copied()
             .collect::<Vec<_>>()
             .join(" ");
 

@@ -135,7 +135,7 @@ impl<'a> DFWasmCompiler<'a> {
             module_template.blocks.push(Block::CallFunction {
                 args: Args::with(vec![num(start_method), num(0), num(0)]),
                 func: DF_FUNC_CALL_FUNC.to_string(),
-            })
+            });
         }
 
         // Set the starting memory size
@@ -186,7 +186,7 @@ impl<'a> DFWasmCompiler<'a> {
     /// Evaluates a constant expression and returns the result as an Item.
     /// As opposed to [`eval_const_expr_as_offset`], this is used for things like
     /// table and global initializers.
-    pub(crate) fn eval_const_expr(&self, expr: ConstExpr) -> DFWasmResult<Item> {
+    pub(crate) fn eval_const_expr(&self, expr: &ConstExpr) -> DFWasmResult<Item> {
         let mut reader = expr.get_operators_reader();
         let op = reader.read()?;
 

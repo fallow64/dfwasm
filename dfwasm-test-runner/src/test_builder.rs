@@ -32,7 +32,7 @@ pub fn compile_module_from_path(wat_path: &Path) -> Result<CompiledModuleTest> {
     let cases_path = wat_path.with_extension("test");
     let cases_file = fs::read_to_string(&cases_path).expect("a .test file for test case");
 
-    let cases = parse_input_file(module_name.to_string(), &cases_file);
+    let cases = parse_input_file(module_name, &cases_file);
 
     compile_module(module_name, &wasm, &cases)
 }

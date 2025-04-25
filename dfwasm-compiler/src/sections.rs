@@ -107,7 +107,7 @@ pub fn compile_section(
 
                 let init_value = match table.init {
                     TableInit::RefNull => num(-1),
-                    TableInit::Expr(const_expr) => compiler.eval_const_expr(const_expr)?,
+                    TableInit::Expr(const_expr) => compiler.eval_const_expr(&const_expr)?,
                 };
                 compiler.table_to_init_expr.push(init_value.clone());
 
@@ -155,7 +155,7 @@ pub fn compile_section(
                 // todo: should we handle immutable/mutability here?
 
                 // Get the initial value
-                let init = compiler.eval_const_expr(global.init_expr)?;
+                let init = compiler.eval_const_expr(&global.init_expr)?;
 
                 // Register it in the globals store of the module template
                 module_template.set_var(
@@ -260,10 +260,8 @@ pub fn compile_section(
             let func_id = compiler.function_counter;
             compiler.function_counter += 1;
 
-            let func_name = generate_function_name(
-                func_id,
-                compiler.options.module_name.as_ref().map(String::as_str),
-            );
+            let func_name =
+                generate_function_name(func_id, compiler.options.module_name.as_deref());
 
             // Append the function to the module template
             module_template.blocks.push(Block::SetVariable {

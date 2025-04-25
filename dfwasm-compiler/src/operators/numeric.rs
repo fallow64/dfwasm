@@ -244,7 +244,7 @@ pub fn compile_numeric_operator(
                     "&",
                     var("$res"),
                     num("%math(%var($a) + %var($b))"),
-                    num(format_df_number_u32(0xFFFFFFFFu32)),
+                    num(format_df_number_u32(0xFFFF_FFFFu32)),
                 )
                 .push_op_stack(var("$res"));
         }
@@ -298,7 +298,7 @@ pub fn compile_numeric_operator(
                     "&",
                     var("$res"),
                     num("%math(1000 * %var($a) * %var($b))"),
-                    num(format_df_number_u32(0xFFFFFFFFu32)),
+                    num(format_df_number_u32(0xFFFF_FFFFu32)),
                 )
                 .push_op_stack(var("$res"));
         }
@@ -330,7 +330,7 @@ pub fn compile_numeric_operator(
                     "&",
                     var("$res"),
                     num("%math(%var($a) / %var($b) / 1000)"),
-                    num(format_df_number_u32(0xFFFFFFFFu32)),
+                    num(format_df_number_u32(0xFFFF_FFFFu32)),
                 )
                 .push_op_stack(var("$res"));
         }
@@ -371,7 +371,7 @@ pub fn compile_numeric_operator(
                     ]),
                 )
                 .pop_op_stack(var("$a"))
-                .push_op_stack(num(format!("%math(%var($a) % %var($b))")));
+                .push_op_stack(num("%math(%var($a) % %var($b))"));
             // .call_function(
             //     DF_FUNC_SIGN_EXTEND,
             //     Args::with(vec![
@@ -424,7 +424,7 @@ pub fn compile_numeric_operator(
                     "&",
                     var("$result"),
                     var("$result"),
-                    num(format_df_number_u32(0xFFFFFFFFu32)),
+                    num(format_df_number_u32(0xFFFF_FFFFu32)),
                 )
                 .push_op_stack(var("$result"));
         }
@@ -451,7 +451,7 @@ pub fn compile_numeric_operator(
                     "&",
                     var("$result"),
                     var("$result"),
-                    num(format_df_number_u32(0xFFFFFFFFu32)),
+                    num(format_df_number_u32(0xFFFF_FFFFu32)),
                 )
                 .push_op_stack(var("$result"));
         }
@@ -539,7 +539,7 @@ pub fn compile_numeric_operator(
                     "&",
                     var("$result"),
                     var("$result"),
-                    num(format_df_number_u32(0xFFFFFFFFu32)),
+                    num(format_df_number_u32(0xFFFF_FFFFu32)),
                 ) // ensure $result is 32 bits
                 .push_op_stack(var("$result"));
         }
@@ -555,7 +555,7 @@ pub fn compile_numeric_operator(
                     "&",
                     var("$result"),
                     var("$result"),
-                    num(format_df_number_u32(0xFFFFFFFFu32)),
+                    num(format_df_number_u32(0xFFFF_FFFFu32)),
                 ) // ensure $result is 32 bits
                 .push_op_stack(var("$result"));
         }
@@ -567,7 +567,7 @@ pub fn compile_numeric_operator(
                     "&",
                     var("$value"),
                     var("$value"),
-                    num(format_df_number_u32(0xFFFFFFFFu32)),
+                    num(format_df_number_u32(0xFFFF_FFFFu32)),
                 )
                 .push_op_stack(var("$value"));
         }

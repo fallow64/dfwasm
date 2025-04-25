@@ -13,23 +13,23 @@ pub struct TestCase {
     pub inputs: Vec<String>,
 }
 
-pub fn parse_string_to_wasmer_value(str_value: &str, ty: &wasmer::Type) -> Result<Value> {
+pub fn parse_string_to_wasmer_value(str_value: &str, ty: wasmer::Type) -> Result<Value> {
     match ty {
         wasmer::Type::I32 => {
             Ok(Value::from(str_value.parse::<i32>().unwrap_or_else(|e| {
-                panic!("Invalid i32: {}. Error: {}", str_value, e)
+                panic!("Invalid i32: {str_value}. Error: {e}")
             })))
         }
         wasmer::Type::I64 => {
             Ok(Value::from(str_value.parse::<i64>().unwrap_or_else(|e| {
-                panic!("Invalid i64: {}. Error: {}", str_value, e)
+                panic!("Invalid i64: {str_value}. Error: {e}")
             })))
         }
         _ => Err(anyhow!("Unsupported type")),
     }
 }
 
-pub fn parse_string_to_df_value(str_value: &str, ty: &wasmer::Type) -> Result<Item> {
+pub fn parse_string_to_df_value(str_value: &str, ty: wasmer::Type) -> Result<Item> {
     match ty {
         wasmer::Type::I32 => Ok(Item::num(format_df_number_i32(
             str_value.parse::<i32>().expect("Invalid i32"),
@@ -156,7 +156,7 @@ pub fn get_wasmer_results(
         .inputs
         .iter()
         .zip(input_types)
-        .map(|(str_value, ty)| parse_string_to_wasmer_value(str_value, ty))
+        .map(|(str_value, ty)| parse_string_to_wasmer_value(str_value, *ty))
         .collect::<Result<Vec<_>>>()?;
 
     // Call the function, and now we have our expected output
@@ -168,7 +168,7 @@ pub fn get_wasmer_results(
     // Convert the result to a DF value
     let df_results = result
         .iter()
-        .map(|value| wasmer_value_to_df_value(value))
+        .map(wasmer_value_to_df_value)
         .collect::<Result<Vec<_>>>()?;
 
     // Convert the inputs to DF values
@@ -176,14 +176,14 @@ pub fn get_wasmer_results(
         .inputs
         .iter()
         .zip(input_types)
-        .map(|(str_value, ty)| parse_string_to_df_value(str_value, ty))
+        .map(|(str_value, ty)| parse_string_to_df_value(str_value, *ty))
         .collect::<Result<Vec<_>>>()?;
 
     Ok((df_inputs, df_results))
 }
 
 /// Parses the input file (xyz.test) and returns a vector of test cases.
-pub fn parse_input_file(module_name: String, contents: &str) -> Vec<TestCase> {
+pub fn parse_input_file(module_name: &str, contents: &str) -> Vec<TestCase> {
     let mut cases = Vec::new();
     for line in contents.lines() {
         if line.trim().is_empty() || line.starts_with('#') {
@@ -199,7 +199,7 @@ pub fn parse_input_file(module_name: String, contents: &str) -> Vec<TestCase> {
             .collect::<Vec<_>>();
 
         cases.push(TestCase {
-            module_name: module_name.clone(),
+            module_name: module_name.to_string(),
             function_name,
             inputs,
         });

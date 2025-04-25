@@ -7,7 +7,7 @@ use memory::compile_memory_operator;
 use numeric::compile_numeric_operator;
 use table::compile_table_operator;
 
-use crate::{DFWasmError, DFWasmResult};
+use crate::{DFWasmError, DFWasmResult, compiler::ControlStackEntry};
 
 use super::{DFWasmCompiler, df_helper::string};
 
@@ -234,8 +234,14 @@ fn handle_debugger_call(compiler: &mut DFWasmCompiler, operator: &Operator, loca
         return;
     }
 
-    // Skip blocks or loops
-    if matches!(operator, Operator::Block { .. } | Operator::Loop { .. }) {
+    // Skip blocks, loops, and ends to functions
+    let is_control_flow_start = matches!(operator, Operator::Block { .. } | Operator::Loop { .. });
+    let is_function_end = matches!(
+        compiler.control_stack.last(),
+        Some(ControlStackEntry::FunctionStart(_))
+    );
+
+    if is_control_flow_start || is_function_end {
         return;
     }
 

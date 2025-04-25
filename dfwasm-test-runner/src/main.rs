@@ -1,7 +1,7 @@
 mod test_builder;
 mod util;
 
-use std::{env, path::PathBuf};
+use std::{collections::HashSet, env, path::PathBuf};
 
 use anyhow::Result;
 use dfwasm_compiler::DFWasmCompilerOptions;
@@ -36,20 +36,35 @@ async fn main() -> Result<()> {
     } else {
         // Use the provided arguments as file paths
         cli_args[1..]
-            .into_iter()
+            .iter()
             .map(PathBuf::from)
             .filter(|path| {
                 path.extension()
-                    .map_or(false, |ext| ext == "wat" || ext == "wasm")
+                    .is_some_and(|ext| ext == "wat" || ext == "wasm")
             })
             .collect()
     };
 
+    let mut modules_compiled = HashSet::new();
     for test_file in wat_files {
         if !test_file.exists() {
             eprintln!("File not found: {}", test_file.display());
             continue;
         }
+
+        let file_stem = test_file
+            .file_stem()
+            .expect("Failed to get file stem")
+            .to_str()
+            .expect("Failed to convert file stem to string");
+
+        if modules_compiled.contains(file_stem) {
+            // Skip if a module by the same name has already been compiled
+            // i.e. `xyz.wat` may be a decompilation of `xyz.wasm`
+            eprintln!("Module already compiled: {file_stem}");
+            continue;
+        }
+        modules_compiled.insert(file_stem.to_string());
 
         let compiled_test = compile_module_from_path(&test_file).unwrap_or_else(|e| {
             panic!("Failed to compile test file {}: {}", test_file.display(), e)
@@ -115,12 +130,10 @@ fn create_root_template(module_tests: Vec<CompiledModuleTest>) -> Vec<Template> 
     // Add the module templates code to the root template
     templates.extend(module_tests.into_iter().flat_map(|test| test.templates));
 
-    // Split the templates.
+    // Return the result of splitting the templates
     // The compiler already splits its functions, however the root template and the templates
     // containg the test cases are not split.
-    let templates = split_templates(templates, 301);
-
-    templates
+    split_templates(templates, 301)
 }
 
 async fn send_templates_to_cc(templates: &[Template]) -> Result<()> {

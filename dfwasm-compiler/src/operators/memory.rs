@@ -178,7 +178,7 @@ pub fn compile_memory_operator(
                 Args::with(vec![
                     num("4"),
                     num(format_df_number_u64(memarg.offset)),
-                    num(format_df_number_i64(0xFFFFFFFF)),
+                    num(format_df_number_i64(0xFFFF_FFFF)),
                 ]),
             );
         }

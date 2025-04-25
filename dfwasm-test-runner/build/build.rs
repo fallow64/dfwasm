@@ -36,7 +36,7 @@ pub fn clear_directory(direction: &str, subdirectory: &str) {
 
             if path
                 .extension()
-                .map_or(false, |ext| ext == "wat" || ext == "wasm" || ext == "test")
+                .is_some_and(|ext| ext == "wat" || ext == "wasm" || ext == "test")
             {
                 fs::remove_file(path).unwrap();
             }

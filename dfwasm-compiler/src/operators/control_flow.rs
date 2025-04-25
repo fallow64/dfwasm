@@ -23,10 +23,8 @@ pub fn compile_control_flow_operator(
     match operator {
         Operator::Block { .. } => {
             let block_id = templates_len;
-            let block_func_name = generate_block_name(
-                block_id,
-                compiler.options.module_name.as_ref().map(String::as_str),
-            );
+            let block_func_name =
+                generate_block_name(block_id, compiler.options.module_name.as_deref());
 
             let template = compiler.get_current_template();
             template
@@ -49,10 +47,8 @@ pub fn compile_control_flow_operator(
         }
         Operator::Loop { .. } => {
             let loop_id = templates_len;
-            let loop_func_name = generate_loop_name(
-                loop_id,
-                compiler.options.module_name.as_ref().map(String::as_str),
-            );
+            let loop_func_name =
+                generate_loop_name(loop_id, compiler.options.module_name.as_deref());
 
             let template = compiler.get_current_template();
             template
@@ -76,10 +72,8 @@ pub fn compile_control_flow_operator(
         }
         Operator::If { .. } => {
             let if_id = templates_len;
-            let if_func_name = generate_conditional_name(
-                if_id,
-                compiler.options.module_name.as_ref().map(String::as_str),
-            );
+            let if_func_name =
+                generate_conditional_name(if_id, compiler.options.module_name.as_deref());
 
             let template = compiler.get_current_template();
             template
@@ -105,10 +99,8 @@ pub fn compile_control_flow_operator(
                 .expect("Control stack is empty");
 
             let if_id = templates_len;
-            let if_func_name = generate_conditional_name(
-                if_id,
-                compiler.options.module_name.as_ref().map(String::as_str),
-            );
+            let if_func_name =
+                generate_conditional_name(if_id, compiler.options.module_name.as_deref());
 
             let template = compiler.get_current_template();
             template

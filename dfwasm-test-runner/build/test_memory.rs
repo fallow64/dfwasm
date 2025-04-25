@@ -49,12 +49,7 @@ fn build_memory_instruction_test(
 
     let mut test_file = String::new();
     for test in tests {
-        let call_args = test
-            .iter()
-            .take(1)
-            .map(|arg| *arg)
-            .collect::<Vec<_>>()
-            .join(" ");
+        let call_args = test.iter().take(1).copied().collect::<Vec<_>>().join(" ");
 
         test_file.push_str(&format!("{} {}\n", function_name, call_args));
     }
