@@ -195,10 +195,13 @@ pub fn compile_memory_operator(
                 .push_op_stack(var(DF_VAR_MEM_SIZE))
                 .set_var("+=", Args::with(vec![var(DF_VAR_MEM_SIZE), var("$delta")]));
         }
-        Operator::MemoryInit { .. }
-        | Operator::DataDrop { .. }
-        | Operator::MemoryCopy { .. }
-        | Operator::MemoryFill { .. } => todo!(),
+        Operator::DataDrop { .. } => {
+            // DataDrop: Drops a data segment from the memory.
+            // (nop in DF)
+        }
+        Operator::MemoryInit { .. } | Operator::MemoryCopy { .. } | Operator::MemoryFill { .. } => {
+            todo!()
+        }
         _ => unreachable!(),
     }
 

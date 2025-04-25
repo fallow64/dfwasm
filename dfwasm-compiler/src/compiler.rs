@@ -35,20 +35,13 @@ pub struct DFWasmCompilerOptions {
     /// Whether or not to limit the size of the templates (highly recommended).
     /// Use this to set your plot size.
     pub max_template_size: Option<usize>,
-    /// Whether or not to batch the data section memory setters into the $batchDataSection function.
-    /// May be useful for large data sections.
-    pub batch_data: bool,
-    /// The number of bytes to batch into the $batchDataSection function.
-    /// By default, this is 26 bytes, and is also the maximum value.
+    /// Configuration for batching data section memory setters. (i.e. combining multiple
+    /// set vars into one function call).
     ///
-    /// Due to how DiamondFire works, a higher number may lead to an issue where you
-    /// can't break the template due to the maximum template data size limit.
+    /// If Some, enables batching with the specified number of bytes per batch.
+    /// Default max is 26 bytes, but 8 may be safer for massive plots.
     ///
-    /// Experimentally, for massive plots and very large data sections, 8 seems to be the maximum.
-    /// Basic and large plots could get away with the default.
-    ///
-    /// If you don't care about deleting the templates, the maximum will also work fine.
-    /// It will just inconvenience you if you delete them without /plot clear.
+    /// Using None disables batching.
     pub batch_data_size: Option<usize>,
     /// Whether or not to only include the module init function in the template.
     /// Useful for debugging data section initialization.

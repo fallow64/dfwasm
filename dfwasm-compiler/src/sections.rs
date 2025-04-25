@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use dfwasm_template::{Args, Block, Template};
 use wasmparser::{
-    DataKind, ElementItems, ElementKind, Encoding, ExternalKind, Payload, TableInit, TypeRef,
+    Data, DataKind, ElementItems, ElementKind, Encoding, ExternalKind, Payload, TableInit, TypeRef,
 };
 
 use crate::{DFWasmError, DFWasmResult, df_helper::DF_VAR_EXPORTS};
@@ -247,89 +247,12 @@ pub fn compile_section(
         }
         Payload::DataCountSection { .. } => {}
         Payload::DataSection(section) => {
-            // todo: this is a messy function
             // The data section contains predefined data to be stored in memory
 
-            for data in section {
-                let data = data?;
+            for data_definition in section {
+                let data_definition = data_definition?;
 
-                match data.kind {
-                    DataKind::Passive => {
-                        // Passive data is not supported
-                        // todo: is this spec?
-                        return Err(DFWasmError::NotYetImplemented("passive data sections"));
-                    }
-                    DataKind::Active {
-                        memory_index: _,
-                        offset_expr,
-                    } => {
-                        let offset = compiler.eval_const_expr_as_offset(&offset_expr)?;
-
-                        if !compiler.options.batch_data {
-                            // Append the data, one block for one byte
-                            for (i, byte) in data.data.iter().enumerate() {
-                                let memory_address = format_df_number_usize(offset + i);
-                                module_template.set_var(
-                                    "=",
-                                    Args::with(vec![
-                                        var(format!("$mem_{memory_address}")),
-                                        num(format_df_number_u64((*byte).into())),
-                                    ]),
-                                );
-                            }
-                        } else {
-                            // Batch the data, one block for batch_size bytes
-                            let batch_size = compiler.options.batch_data_size.unwrap_or(26);
-
-                            let mut initial_memory_address = offset;
-                            let mut buffer = Vec::new();
-
-                            for byte in data.data {
-                                buffer.push(*byte);
-                                if buffer.len() == batch_size {
-                                    let mut args =
-                                        vec![num(format_df_number_usize(initial_memory_address))];
-                                    args.extend(
-                                        buffer
-                                            .iter()
-                                            .map(|byte| num(format_df_number_u64((*byte).into())))
-                                            .collect::<Vec<_>>(),
-                                    );
-
-                                    // Call the batch function
-                                    module_template.call_function(
-                                        DF_FUNC_BATCH_DATA_SECTION,
-                                        Args::with(args),
-                                    );
-
-                                    // Reset the buffer and bump the address
-                                    buffer.clear();
-                                    initial_memory_address += batch_size;
-                                }
-                            }
-
-                            // Clear out the buffer
-                            if !buffer.is_empty() {
-                                let mut args =
-                                    vec![num(format_df_number_usize(initial_memory_address))];
-
-                                args.extend(
-                                    buffer
-                                        .iter()
-                                        .map(|byte| num(format_df_number_u64((*byte).into())))
-                                        .collect::<Vec<_>>(),
-                                );
-
-                                // Call the batch function
-                                module_template
-                                    .call_function(DF_FUNC_BATCH_DATA_SECTION, Args::with(args));
-
-                                // Reset the buffer and bump the address
-                                buffer.clear();
-                            }
-                        }
-                    }
-                }
+                compile_data_initialization(compiler, module_template, data_definition)?;
             }
         }
         Payload::CodeSectionStart { .. } => {}
@@ -398,6 +321,82 @@ pub fn compile_section(
         }
         Payload::End(_) => {}
         _ => return Err(DFWasmError::UnknownPayload),
+    }
+
+    Ok(())
+}
+
+fn compile_data_initialization(
+    compiler: &mut DFWasmCompiler,
+    module_template: &mut Template,
+    data_definition: Data<'_>,
+) -> DFWasmResult<()> {
+    let offset_expr = match data_definition.kind {
+        DataKind::Passive => return Err(DFWasmError::NotYetImplemented("passive data sections")),
+        DataKind::Active {
+            memory_index: _,
+            offset_expr,
+        } => offset_expr,
+    };
+
+    let offset = compiler.eval_const_expr_as_offset(&offset_expr)?;
+
+    match compiler.options.batch_data_size {
+        Some(batch_size) => {
+            let mut initial_memory_address = offset;
+            let mut buffer = Vec::new();
+
+            for byte in data_definition.data {
+                buffer.push(*byte);
+                if buffer.len() == batch_size {
+                    let mut args = vec![num(format_df_number_usize(initial_memory_address))];
+                    args.extend(
+                        buffer
+                            .iter()
+                            .map(|byte| num(format_df_number_u64((*byte).into())))
+                            .collect::<Vec<_>>(),
+                    );
+
+                    // Call the batch function
+                    module_template.call_function(DF_FUNC_BATCH_DATA_SECTION, Args::with(args));
+
+                    // Reset the buffer and bump the address
+                    buffer.clear();
+                    initial_memory_address += batch_size;
+                }
+            }
+
+            // Clear out the buffer
+            if !buffer.is_empty() {
+                let mut args = vec![num(format_df_number_usize(initial_memory_address))];
+
+                args.extend(
+                    buffer
+                        .iter()
+                        .map(|byte| num(format_df_number_u64((*byte).into())))
+                        .collect::<Vec<_>>(),
+                );
+
+                // Call the batch function
+                module_template.call_function(DF_FUNC_BATCH_DATA_SECTION, Args::with(args));
+
+                // Reset the buffer and bump the address
+                buffer.clear();
+            }
+        }
+        None => {
+            // Append the data, one block for one byte
+            for (i, byte) in data_definition.data.iter().enumerate() {
+                let memory_address = format_df_number_usize(offset + i);
+                module_template.set_var(
+                    "=",
+                    Args::with(vec![
+                        var(format!("$mem_{memory_address}")),
+                        num(format_df_number_u64((*byte).into())),
+                    ]),
+                );
+            }
+        }
     }
 
     Ok(())

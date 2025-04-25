@@ -74,7 +74,6 @@ async fn main() {
             debugger: cli_args.debugger,
             skip_nop_debugger: false,
             max_template_size: Some(cli_args.size),
-            batch_data: cli_args.batch_data.is_some(),
             batch_data_size: cli_args.batch_data,
             only_include_module_init: false,
         },
