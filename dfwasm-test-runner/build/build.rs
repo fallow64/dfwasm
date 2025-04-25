@@ -1,3 +1,6 @@
+//! This build script is responsible for generating test files for single operators (i.e. simple
+//! arithmetic and memory operations).
+
 use std::fmt;
 use std::fs::{self, File};
 use std::io::Write;

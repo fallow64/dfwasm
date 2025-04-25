@@ -4,18 +4,31 @@ mod util;
 use std::{env, path::PathBuf};
 
 use anyhow::Result;
+use dfwasm_compiler::DFWasmCompilerOptions;
 use dfwasm_template::{
     Args, CodeBlock, Item, Template, split_templates, template_sender::DFApiClient,
 };
 use test_builder::compile_module_from_path;
 use util::CompiledModuleTest;
 
+pub const PLOT_SIZE: usize = 301;
+pub const TEST_COMPILER_OPTIONS: DFWasmCompilerOptions = DFWasmCompilerOptions {
+    module_name: None,
+    debugger: false,
+    skip_nop_debugger: false,
+    max_template_size: Some(PLOT_SIZE),
+    batch_data: true,
+    batch_data_size: None,
+    only_include_module_init: false,
+};
+
 #[tokio::main]
 async fn main() -> Result<()> {
     let mut compiled_module_tests = Vec::new();
 
     let cli_args: Vec<_> = env::args().collect();
-    let test_files: Vec<PathBuf> = if cli_args.len() == 1 {
+
+    let wat_files: Vec<PathBuf> = if cli_args.len() == 1 {
         // Glob under test_files directory
         glob::glob("test_files/**/*.wat")
             .expect("Valid glob pattern")
@@ -32,7 +45,7 @@ async fn main() -> Result<()> {
             .collect()
     };
 
-    for test_file in test_files {
+    for test_file in wat_files {
         if !test_file.exists() {
             eprintln!("File not found: {}", test_file.display());
             continue;
@@ -106,10 +119,12 @@ fn create_root_template(module_tests: Vec<CompiledModuleTest>) -> Vec<Template> 
         .close_bracket_repeat();
 
     let mut templates = vec![root_template];
-    // Add the test templates to the root templates
+    // Add the module templates code to the root template
     templates.extend(module_tests.into_iter().flat_map(|test| test.templates));
 
-    // Split the templates
+    // Split the templates.
+    // The compiler already splits its functions, however the root template and the templates
+    // containg the test cases are not split.
     let templates = split_templates(templates, 301);
 
     templates

@@ -5,22 +5,19 @@ use dfwasm_compiler::{DFWasmCompiler, DFWasmCompilerOptions};
 use dfwasm_template::{Args, Item, Location, Template};
 use wasmer::{Instance, Module, Store, wat2wasm};
 
-use crate::util::{
-    CompiledModuleTest, TestCase, clear_variables, get_wasmer_results, parse_input_file,
-};
-
-const PLOT_SIZE: usize = 301;
-const TEST_COMPILER_OPTIONS: DFWasmCompilerOptions = DFWasmCompilerOptions {
-    module_name: None,
-    debugger: false,
-    skip_nop_debugger: false,
-    max_template_size: Some(PLOT_SIZE),
-    batch_data: true,
-    batch_data_size: None,
-    only_include_module_init: false,
+use crate::{
+    TEST_COMPILER_OPTIONS,
+    util::{CompiledModuleTest, TestCase, clear_variables, get_wasmer_results, parse_input_file},
 };
 
 /// Compiles a module to test from a WAT file.
+///
+/// Each individual test is separated into two files: `<test_name>.wat` and `<test_name>.test`.
+/// The WAT file contains the module's code, while the `.test` file contains test cases.
+///
+/// Each test case is a function call to some exported function in the module.
+/// This is compared to what `wasmer` returns from the same code, and DF code is generated
+/// to ensure they have the same result.
 pub fn compile_module_from_path(wat_path: &Path) -> Result<CompiledModuleTest> {
     let wat_contents = fs::read(wat_path)?;
     let wasm = wat2wasm(&wat_contents)

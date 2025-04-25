@@ -1,4 +1,4 @@
-use crate::{Args, Block, BracketDirection, Template};
+use crate::{Args, Block, BracketDirection, Item, Template};
 
 /// The amount of blocks in a code block.
 const CODE_BLOCK_SIZE: usize = 2;
@@ -23,11 +23,15 @@ pub fn split_templates(templates: Vec<Template>, max_size: usize) -> Vec<Templat
         // Get the new name of the template
         let new_function_name = match template.blocks.first() {
             Some(Block::Function { args, name }) => {
-                if true {
+                let mut non_tag_args = args
+                    .0
+                    .iter()
+                    .filter(|(_, item)| !matches!(item, Item::Tag { .. }));
+
+                if non_tag_args.next().is_none() {
                     get_next_function_name(name)
                 } else {
-                    // todo: handle this better
-                    panic!("Functions with arguments are not supported for splitting");
+                    panic!("Functions with parameters are not supported for splitting");
                 }
             }
             _ => panic!("Non-functions are not supported for splitting"),

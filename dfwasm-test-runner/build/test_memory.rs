@@ -65,7 +65,7 @@ fn build_memory_instruction_test(
 pub fn build() {
     clear_directory("wat_single", "memory");
 
-    let load_instructions = vec![
+    let load_instructions = &[
         "i32.load",
         "i64.load",
         "i32.load8_u",
@@ -80,7 +80,7 @@ pub fn build() {
         "i64.load32_s",
     ];
 
-    let store_instructions = vec![
+    let store_instructions = &[
         "i32.store",
         "i64.store",
         "i32.store8",
@@ -94,10 +94,12 @@ pub fn build() {
         build_memory_instruction_test(
             load_instruction,
             MemoryTestType::Load,
-            if load_instruction.contains("i32") {
+            if load_instruction.starts_with("i32") {
                 Type::I32
-            } else {
+            } else if load_instruction.starts_with("i64") {
                 Type::I64
+            } else {
+                panic!("Unknown load instruction: {}", load_instruction);
             },
             I32_1,
         );
@@ -107,10 +109,12 @@ pub fn build() {
         build_memory_instruction_test(
             store_instruction,
             MemoryTestType::Store,
-            if store_instruction.contains("i32") {
+            if store_instruction.starts_with("i32") {
                 Type::I32
-            } else {
+            } else if store_instruction.starts_with("i64") {
                 Type::I64
+            } else {
+                panic!("Unknown store instruction: {}", store_instruction);
             },
             I32_1,
         );

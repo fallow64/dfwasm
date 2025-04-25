@@ -1,5 +1,5 @@
 use anyhow::{Result, anyhow};
-use dfwasm_template::{Args, CodeBlock, Item, Template, template_sender::DFApiClient};
+use dfwasm_template::{Args, CodeBlock, Item, Template};
 use wasmer::{Instance, Store, Value};
 
 pub struct CompiledModuleTest {
