@@ -27,7 +27,7 @@ struct CLIArgs {
     #[command(flatten)]
     output: OutputMethod,
 
-    #[arg(help = "The path to the WebAssembly file", value_hint = ValueHint::FilePath)]
+    #[arg(help = "The path to the WebAssembly file (or .wat)", value_hint = ValueHint::FilePath)]
     path: PathBuf,
 }
 
