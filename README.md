@@ -3,7 +3,7 @@
 `dfwasm` is a compiler that compiles [WebAssembly](https://developer.mozilla.org/en-US/docs/WebAssembly) (WASM) to [DiamondFire](https://mcdiamondfire.com) (DF) templates. It is designed to translate WASM modules into several templates, which can be used within DiamondFire code.
 
 This allows you to write code in a language that compiles to WASM, and then use that code within DiamondFire. <br/>
-<sup><sub>Yes, that means you can run blazingly fast Rust in DF.</sub></sup>
+<sup><sub>Yes, that means you can run blazingly fast Rust in DiamondFire.</sub></sup>
 
 > [!NOTE]
 > This compiler does not support floating point numbers. Numbers in DiamondFire are represented as fixed-point integers with a 1/1000 scale, so supporting floats would require implementing fixed-point math from scratch. While this would be possible, it would not be performant within DiamondFire.
@@ -55,7 +55,7 @@ The project is divided into several Cargo packages:
 ## Roadmap
 
 - [ ] An automated test suite.
-- [ ] Add the [utility functions](/dfwasm-compiler/src/df_helper.rs#L=999999999) to the compiler.
+- [ ] Add the [utility functions](/dfwasm-compiler/src/df_helper.rs#L=241) to the compiler.
 - [ ] Allow multiple modules to be initialized and ran at once.
 - [ ] Extract commonly used lists of instructions into a different function to reduce code duplication.
 - [ ] Combine multiple small templates into one large template that fits within the size limit.

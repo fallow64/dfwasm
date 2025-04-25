@@ -828,6 +828,21 @@ impl Template {
         self
     }
 
+    pub fn repeat_subaction(
+        &mut self,
+        action: impl Into<String>,
+        sub_action: impl Into<String>,
+        args: Args,
+    ) -> &mut Self {
+        self.add_block(Block::Repeat {
+            args,
+            action: action.into(),
+            sub_action: Some(sub_action.into()),
+            is_negated: false,
+        });
+        self
+    }
+
     pub fn open_bracket(&mut self) -> &mut Self {
         self.add_block(Block::Bracket {
             direction: BracketDirection::Open,

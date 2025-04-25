@@ -83,7 +83,11 @@ pub fn compile_operator(
         | Operator::I64Store16 { .. }
         | Operator::I64Store32 { .. }
         | Operator::MemorySize { .. }
-        | Operator::MemoryGrow { .. } => compile_memory_operator(compiler, operator, location),
+        | Operator::MemoryGrow { .. }
+        | Operator::DataDrop { .. }
+        | Operator::MemoryInit { .. }
+        | Operator::MemoryCopy { .. }
+        | Operator::MemoryFill { .. } => compile_memory_operator(compiler, operator, location),
         Operator::I32Const { .. }
         | Operator::I64Const { .. }
         | Operator::F32Const { .. }
@@ -239,7 +243,7 @@ fn handle_debugger_call(compiler: &mut DFWasmCompiler, operator: &Operator, loca
     let is_function_end = matches!(
         compiler.control_stack.last(),
         Some(ControlStackEntry::FunctionStart(_))
-    );
+    ) && matches!(operator, Operator::End);
 
     if is_control_flow_start || is_function_end {
         return;

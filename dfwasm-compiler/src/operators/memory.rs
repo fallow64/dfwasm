@@ -199,8 +199,30 @@ pub fn compile_memory_operator(
             // DataDrop: Drops a data segment from the memory.
             // (nop in DF)
         }
-        Operator::MemoryInit { .. } | Operator::MemoryCopy { .. } | Operator::MemoryFill { .. } => {
+        Operator::MemoryInit { .. } | Operator::MemoryCopy { .. } => {
             todo!()
+        }
+        Operator::MemoryFill { .. } => {
+            template
+                .pop_op_stack(var("$n"))
+                .pop_op_stack(var("$value"))
+                .pop_op_stack(var("$ptr"))
+                .repeat_subaction(
+                    "While",
+                    "!=",
+                    Args::with(vec![var("$n"), num(format_df_number_i64(0))]),
+                )
+                .open_bracket_repeat()
+                .set_var("=", Args::with(vec![var("$mem_%var($ptr)"), var("$value")]))
+                .set_var(
+                    "+=",
+                    Args::with(vec![var("$ptr"), num(format_df_number_i64(1))]),
+                )
+                .set_var(
+                    "-=",
+                    Args::with(vec![var("$n"), num(format_df_number_i64(1))]),
+                )
+                .close_bracket_repeat();
         }
         _ => unreachable!(),
     }
