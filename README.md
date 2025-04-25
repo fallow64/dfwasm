@@ -55,6 +55,7 @@ The project is divided into several Cargo packages:
 ## Roadmap
 
 - [ ] An automated test suite.
+- [ ] Add the [utility functions](/dfwasm-compiler/src/df_helper.rs#L=999999999) to the compiler.
 - [ ] Allow multiple modules to be initialized and ran at once.
 - [ ] Extract commonly used lists of instructions into a different function to reduce code duplication.
 - [ ] Combine multiple small templates into one large template that fits within the size limit.
