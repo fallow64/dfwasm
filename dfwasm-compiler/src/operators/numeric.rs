@@ -501,8 +501,14 @@ pub fn compile_numeric_operator(
             template
                 .pop_op_stack(var("$b"))
                 .pop_op_stack(var("$a"))
+                .set_var_bitwise("&", var("$b"), var("$b"), num(format_df_number_usize(0x3F))) // ensure $shift is 6 bits (0..=63);
                 .set_var_bitwise("<<", var("$lhs"), var("$a"), var("$b"))
-                .set_var_bitwise(">>", var("$rhs"), var("$a"), num("%math(64 - %var($b))"))
+                .set_var_bitwise(
+                    ">>>",
+                    var("$rhs"),
+                    var("$a"),
+                    num("%math(0.064 - %var($b))"),
+                )
                 .set_var_bitwise("|", var("$result"), var("$lhs"), var("$rhs")) // ensure $result is 32 bits
                 .push_op_stack(var("$result"));
         }
@@ -510,8 +516,9 @@ pub fn compile_numeric_operator(
             template
                 .pop_op_stack(var("$b"))
                 .pop_op_stack(var("$a"))
-                .set_var_bitwise(">>", var("$lhs"), var("$a"), var("$b"))
-                .set_var_bitwise("<<", var("$rhs"), var("$a"), num("%math(64 - %var($b))"))
+                .set_var_bitwise("&", var("$b"), var("$b"), num(format_df_number_usize(0x3F))) // ensure $shift is 6 bits (0..=63);
+                .set_var_bitwise(">>>", var("$lhs"), var("$a"), var("$b"))
+                .set_var_bitwise("<<", var("$rhs"), var("$a"), num("%math(0.064 - %var($b))"))
                 .set_var_bitwise("|", var("$result"), var("$lhs"), var("$rhs"))
                 .push_op_stack(var("$result"));
         }
@@ -521,7 +528,12 @@ pub fn compile_numeric_operator(
                 .pop_op_stack(var("$a"))
                 .set_var_bitwise("&", var("$b"), var("$b"), num(format_df_number_usize(0x1F))) // ensure $shift is 5 bits (0..=31);
                 .set_var_bitwise("<<", var("$lhs"), var("$a"), var("$b"))
-                .set_var_bitwise(">>", var("$rhs"), var("$a"), num("%math(32 - %var($b))"))
+                .set_var_bitwise(
+                    ">>>",
+                    var("$rhs"),
+                    var("$a"),
+                    num("%math(0.032 - %var($b))"),
+                )
                 .set_var_bitwise("|", var("$result"), var("$lhs"), var("$rhs"))
                 .set_var_bitwise(
                     "&",
@@ -536,8 +548,8 @@ pub fn compile_numeric_operator(
                 .pop_op_stack(var("$b"))
                 .pop_op_stack(var("$a"))
                 .set_var_bitwise("&", var("$b"), var("$b"), num(format_df_number_usize(0x1F))) // ensure $shift is 5 bits (0..31);
-                .set_var_bitwise(">>", var("$lhs"), var("$a"), var("$b"))
-                .set_var_bitwise("<<", var("$rhs"), var("$a"), num("%math(32 - %var($b))"))
+                .set_var_bitwise(">>>", var("$lhs"), var("$a"), var("$b"))
+                .set_var_bitwise("<<", var("$rhs"), var("$a"), num("%math(0.032 - %var($b))"))
                 .set_var_bitwise("|", var("$result"), var("$lhs"), var("$rhs"))
                 .set_var_bitwise(
                     "&",
@@ -576,7 +588,7 @@ pub fn compile_numeric_operator(
             // I32Extend8S: Pops a value from the stack and sign-extends it to 32 bits.
             // stack: $value -> $result
 
-            template.pop_op_stack(var("$value")).call_function(
+            template.call_function(
                 DF_FUNC_SIGN_EXTEND,
                 Args::with(vec![
                     num(format_df_number_u64(8)),
@@ -588,7 +600,7 @@ pub fn compile_numeric_operator(
             // I32Extend16S: Pops a value from the stack and sign-extends it to 32 bits.
             // stack: $value -> $result
 
-            template.pop_op_stack(var("$value")).call_function(
+            template.call_function(
                 DF_FUNC_SIGN_EXTEND,
                 Args::with(vec![
                     num(format_df_number_u64(16)),
@@ -600,7 +612,7 @@ pub fn compile_numeric_operator(
             // I64Extend8S: Pops a value from the stack and sign-extends it to 64 bits.
             // stack: $value -> $result
 
-            template.pop_op_stack(var("$value")).call_function(
+            template.call_function(
                 DF_FUNC_SIGN_EXTEND,
                 Args::with(vec![
                     num(format_df_number_u64(8)),
@@ -612,7 +624,7 @@ pub fn compile_numeric_operator(
             // I64Extend16S: Pops a value from the stack and sign-extends it to 64 bits.
             // stack: $value -> $result
 
-            template.pop_op_stack(var("$value")).call_function(
+            template.call_function(
                 DF_FUNC_SIGN_EXTEND,
                 Args::with(vec![
                     num(format_df_number_u64(16)),
@@ -624,7 +636,7 @@ pub fn compile_numeric_operator(
             // I64Extend32S: Pops a value from the stack and sign-extends it to 64 bits.
             // stack: $value -> $result
 
-            template.pop_op_stack(var("$value")).call_function(
+            template.call_function(
                 DF_FUNC_SIGN_EXTEND,
                 Args::with(vec![
                     num(format_df_number_u64(32)),

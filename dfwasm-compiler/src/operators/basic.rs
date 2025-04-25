@@ -4,7 +4,8 @@ use wasmparser::Operator;
 use crate::{
     DFWasmCompiler, DFWasmResult,
     df_helper::{
-        DF_FUNC_CALL_FUNC, DF_VAR_CURRENT_STACK_FRAME, DF_VAR_STORE_TABLES, TemplateExt, num, var,
+        DF_FUNC_CALL_FUNC, DF_VAR_CURRENT_STACK_FRAME, DF_VAR_STORE_GLOBALS, DF_VAR_STORE_TABLES,
+        TemplateExt, num, var,
     },
 };
 
@@ -53,6 +54,8 @@ pub fn compile_basic_operator(
 
             let signature = &compiler.function_signatures[type_index as usize];
             let arg_count = DFWasmCompiler::arg_count_of_type(signature).expect("Not a function?");
+            let res_count =
+                DFWasmCompiler::result_count_of_type(signature).expect("Not a function?");
 
             // get the template reference again due to borrow checker
             let template = compiler.get_current_template();
@@ -76,7 +79,7 @@ pub fn compile_basic_operator(
                 )
                 .call_function(
                     DF_FUNC_CALL_FUNC,
-                    Args::with(vec![var("$func_idx"), num(arg_count)]),
+                    Args::with(vec![var("$func_idx"), num(arg_count), num(res_count)]),
                 );
         }
         Operator::Drop => {
@@ -146,7 +149,7 @@ pub fn compile_basic_operator(
                     "GetListValue",
                     Args::with(vec![
                         var("$value"),
-                        var(DF_VAR_STORE_TABLES),
+                        var(DF_VAR_STORE_GLOBALS),
                         num(global_index + 1),
                     ]),
                 )
@@ -158,7 +161,7 @@ pub fn compile_basic_operator(
             template.pop_op_stack(var("$value")).set_var(
                 "SetListValue",
                 Args::with(vec![
-                    var(DF_VAR_STORE_TABLES),
+                    var(DF_VAR_STORE_GLOBALS),
                     num(global_index + 1),
                     var("$value"),
                 ]),

@@ -72,13 +72,6 @@ pub fn clear_variables(template: &mut Template) {
     );
 }
 
-pub async fn send_templates_to_cc(templates: &[Template]) -> Result<()> {
-    let mut client = DFApiClient::connect().await?;
-    client.send_templates(templates, false).await?;
-
-    Ok(())
-}
-
 pub fn format_df_number_i64(value: i64) -> String {
     let abs = value.unsigned_abs();
     let int_part = abs / 1000;
@@ -134,7 +127,7 @@ pub fn format_df_number_i32(value: i32) -> String {
     }
 }
 
-/// Returns (inputs, expected results)
+/// Returns `(inputs, expected results)`
 pub fn get_wasmer_results(
     case: &TestCase,
     store: &mut Store,
@@ -148,7 +141,12 @@ pub fn get_wasmer_results(
         .exports()
         .functions()
         .find(|f| f.name() == case.function_name)
-        .ok_or_else(|| anyhow!("Function {} not found in module", case.function_name))?;
+        .ok_or_else(|| {
+            anyhow!(
+                "Function {:?} not found in module exports",
+                case.function_name
+            )
+        })?;
 
     let function_type = export_type.ty();
 
@@ -184,16 +182,15 @@ pub fn get_wasmer_results(
     Ok((df_inputs, df_results))
 }
 
+/// Parses the input file (xyz.test) and returns a vector of test cases.
 pub fn parse_input_file(module_name: String, contents: &str) -> Vec<TestCase> {
     let mut cases = Vec::new();
     for line in contents.lines() {
         if line.trim().is_empty() || line.starts_with('#') {
             continue; // Skip empty lines and comments
         }
+
         let parts: Vec<&str> = line.split_whitespace().collect();
-        if parts.len() < 2 {
-            continue; // Invalid line format
-        }
 
         let function_name = parts[0].to_string();
         let inputs = parts[1..]

@@ -117,7 +117,7 @@ pub fn format_df_number_u64(value: u64) -> String {
     if frac_str.is_empty() {
         format!("{int_part}")
     } else {
-        format!("{int_part}.{frac_part}")
+        format!("{int_part}.{frac_str}")
     }
 }
 
@@ -267,3 +267,5 @@ pub const DF_FUNC_CONTROL_LOOP_CHECK: &str = "$controlLoopCheck";
 
 pub const DF_VAR_CURRENT_STACK_FRAME: &str = "$currentStackFrame";
 pub const DF_VAR_EXPORTS: &str = "$exports";
+
+pub const DF_VAR_MODULE_INIT_FUNC: &str = "$moduleInitFunc";

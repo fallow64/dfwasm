@@ -3,7 +3,10 @@ use std::{rc::Rc, vec};
 use dfwasm_template::{Args, Block, Item, Template, split_templates};
 use wasmparser::{ConstExpr, MemoryType, Operator, Parser, RecGroup};
 
-use crate::{DFWasmError, DFWasmResult};
+use crate::{
+    DFWasmError, DFWasmResult,
+    df_helper::{DF_VAR_MEM_SIZE, DF_VAR_MODULE_INIT_FUNC, format_df_number_u64, string, var},
+};
 
 use super::{
     df_helper::{DF_FUNC_CALL_FUNC, format_df_number_i64, num},
@@ -89,7 +92,7 @@ pub struct DFWasmCompiler<'a> {
 
 impl<'a> DFWasmCompiler<'a> {
     /// Compiles a WASM file into DiamondFire templates.
-    pub fn wasm_to_template(
+    pub fn compile_wasm(
         wasm: &'a [u8],
         options: DFWasmCompilerOptions,
     ) -> DFWasmResult<Vec<Template>> {
@@ -119,7 +122,14 @@ impl<'a> DFWasmCompiler<'a> {
             Some(name) => format!("{}_module_init", name),
             None => "module_init".to_string(),
         };
-        let mut module_template = Template::start_function(module_template_name);
+        let mut module_template = Template::start_function(module_template_name.clone());
+        module_template.set_var(
+            "=",
+            Args::with(vec![
+                var(DF_VAR_MODULE_INIT_FUNC),
+                string(module_template_name),
+            ]),
+        );
 
         // Iterate over every section in the WASM file
         for section in parser.parse_all(self.wasm) {
@@ -130,9 +140,20 @@ impl<'a> DFWasmCompiler<'a> {
         // Add the start method to the module template if it exists
         if let Some(start_method) = self.start_method {
             module_template.blocks.push(Block::CallFunction {
-                args: Args::with(vec![num(start_method)]),
+                args: Args::with(vec![num(start_method), num(0), num(0)]),
                 func: DF_FUNC_CALL_FUNC.to_string(),
             })
+        }
+
+        // Set the starting memory size
+        if let Some(memory_type) = self.memory_type {
+            module_template.set_var(
+                "=",
+                Args::with(vec![
+                    var(DF_VAR_MEM_SIZE),
+                    num(format_df_number_u64(memory_type.initial)),
+                ]),
+            );
         }
 
         if self.options.only_include_module_init {

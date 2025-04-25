@@ -1,11 +1,13 @@
-use clap::{Args, Parser, command};
+use std::path::PathBuf;
+
+use clap::{Args, Parser, ValueHint, command};
 use dfwasm_compiler::{DFWasmCompiler, DFWasmCompilerOptions};
 use dfwasm_template::{Template, template_sender::DFApiClient};
 
 #[derive(Parser, Debug)]
 #[command(
-    name = "DFWasm CLI",
-    version = "0.1.0",
+    name = "dfwasm",
+    version,
     about = "A compiler from WebAssembly to DiamondFire templates."
 )]
 struct CLIArgs {
@@ -25,8 +27,8 @@ struct CLIArgs {
     #[command(flatten)]
     output: OutputMethod,
 
-    #[arg(help = "The path to the WebAssembly file")]
-    path: String,
+    #[arg(help = "The path to the WebAssembly file", value_hint = ValueHint::FilePath)]
+    path: PathBuf,
 }
 
 #[derive(Args, Debug)]
@@ -52,10 +54,20 @@ struct OutputMethod {
 async fn main() {
     let cli_args = CLIArgs::parse();
 
-    let bytes = std::fs::read(&cli_args.path)
-        .unwrap_or_else(|_| panic!("Failed to read file: {}", cli_args.path));
+    let bytes = match cli_args.path.extension() {
+        Some(ext) if ext == "wasm" => std::fs::read(&cli_args.path)
+            .unwrap_or_else(|_| panic!("Failed to read: {}", cli_args.path.display())),
+        Some(ext) if ext == "wat" => wat::parse_file(&cli_args.path).unwrap_or_else(|e| {
+            panic!(
+                "Failed to parse WAT file: {}\n{}",
+                cli_args.path.display(),
+                e
+            )
+        }),
+        _ => panic!("Unsupported file extension. Use .wasm or .wat"),
+    };
 
-    let templates = DFWasmCompiler::wasm_to_template(
+    let templates = DFWasmCompiler::compile_wasm(
         &bytes,
         DFWasmCompilerOptions {
             module_name: None,

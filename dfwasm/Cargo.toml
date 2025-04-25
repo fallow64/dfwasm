@@ -5,9 +5,11 @@ authors.workspace = true
 license.workspace = true
 version.workspace = true
 edition.workspace = true
+default-run = "dfwasm"
 
 [dependencies]
 dfwasm-compiler = { path = "../dfwasm-compiler" }
 dfwasm-template = { path = "../dfwasm-template", features = ["codeclient"] }
 tokio = { version = "1.44.2", features = ["rt-multi-thread", "macros"] }
 clap = { version = "4.5.37", features = ["derive"] }
+wat = "1.229.0"

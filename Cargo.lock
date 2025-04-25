@@ -650,6 +650,7 @@ dependencies = [
  "dfwasm-compiler",
  "dfwasm-template",
  "tokio",
+ "wat",
 ]
 
 [[package]]

@@ -1,0 +1,5 @@
+memory_overwrite 2
+memory_overwrite 1
+memory_overwrite 0
+memory_overwrite -1
+memory_overwrite -2

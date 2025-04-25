@@ -1,0 +1,9 @@
+call_indirect 0 3 5
+call_indirect 1 3 5
+call_indirect 2 3 5
+call_indirect 3 3 5
+
+call_indirect 3 -5 5
+
+call_indirect 20 20 50
+call_indirect 24 20 50

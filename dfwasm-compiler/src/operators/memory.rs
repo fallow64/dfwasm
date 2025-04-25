@@ -112,7 +112,7 @@ pub fn compile_memory_operator(
             template
                 .call_function(
                     DF_FUNC_MEM_LOAD,
-                    Args::with(vec![num("2"), num(format_df_number_u64(memarg.offset))]),
+                    Args::with(vec![num("4"), num(format_df_number_u64(memarg.offset))]),
                 )
                 .call_function(
                     DF_FUNC_SIGN_EXTEND,
@@ -137,7 +137,7 @@ pub fn compile_memory_operator(
 
             template.call_function(
                 DF_FUNC_MEM_STORE,
-                Args::with(vec![num("4"), num(format_df_number_u64(memarg.offset))]),
+                Args::with(vec![num("8"), num(format_df_number_u64(memarg.offset))]),
             );
         }
         Operator::I32Store8 { memarg } | Operator::I64Store8 { memarg } => {

@@ -1,0 +1,6 @@
+memory_offset 1 2 3
+memory_offset 10 20 30
+memory_offset 2 3 4
+memory_offset 0 0 0
+memory_offset -1 -100 10
+memory_offset -1 -2 -3
