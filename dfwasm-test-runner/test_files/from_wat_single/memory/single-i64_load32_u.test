@@ -1,0 +1,17 @@
+i64_load32_u 0
+i64_load32_u 1
+i64_load32_u -1
+i64_load32_u 2
+i64_load32_u 3
+i64_load32_u 4
+i64_load32_u 5
+i64_load32_u 6
+i64_load32_u 7
+i64_load32_u 8
+i64_load32_u 9
+i64_load32_u 10
+i64_load32_u -10
+i64_load32_u 1234
+i64_load32_u 2147483647
+i64_load32_u -2147483648
+

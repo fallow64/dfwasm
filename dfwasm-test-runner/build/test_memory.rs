@@ -59,11 +59,17 @@ fn build_memory_instruction_test(
         test_file.push_str(&format!("{} {}\n", function_name, call_args));
     }
 
-    write_test("wat_single", "memory", &module_name, &wat_file, &test_file);
+    write_test(
+        "from_wat_single",
+        "memory",
+        &module_name,
+        &wat_file,
+        &test_file,
+    );
 }
 
 pub fn build() {
-    clear_directory("wat_single", "memory");
+    clear_directory("from_wat_single", "memory");
 
     let load_instructions = &[
         "i32.load",

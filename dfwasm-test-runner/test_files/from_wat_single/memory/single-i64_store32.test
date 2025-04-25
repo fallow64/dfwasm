@@ -1,0 +1,17 @@
+i64_store32 0
+i64_store32 1
+i64_store32 -1
+i64_store32 2
+i64_store32 3
+i64_store32 4
+i64_store32 5
+i64_store32 6
+i64_store32 7
+i64_store32 8
+i64_store32 9
+i64_store32 10
+i64_store32 -10
+i64_store32 1234
+i64_store32 2147483647
+i64_store32 -2147483648
+

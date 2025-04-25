@@ -65,7 +65,7 @@ fn build_airhtmetic_instruction_test(instruction: &Instruction, tests: &[TestCas
     }
 
     write_test(
-        "wat_single",
+        "from_wat_single",
         "arithmetic",
         &module_name,
         &wat_file,

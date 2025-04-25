@@ -1,0 +1,17 @@
+i32_store 0
+i32_store 1
+i32_store -1
+i32_store 2
+i32_store 3
+i32_store 4
+i32_store 5
+i32_store 6
+i32_store 7
+i32_store 8
+i32_store 9
+i32_store 10
+i32_store -10
+i32_store 1234
+i32_store 2147483647
+i32_store -2147483648
+

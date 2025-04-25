@@ -1,0 +1,17 @@
+i32_load16_u 0
+i32_load16_u 1
+i32_load16_u -1
+i32_load16_u 2
+i32_load16_u 3
+i32_load16_u 4
+i32_load16_u 5
+i32_load16_u 6
+i32_load16_u 7
+i32_load16_u 8
+i32_load16_u 9
+i32_load16_u 10
+i32_load16_u -10
+i32_load16_u 1234
+i32_load16_u 2147483647
+i32_load16_u -2147483648
+

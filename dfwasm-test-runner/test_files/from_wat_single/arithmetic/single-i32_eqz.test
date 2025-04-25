@@ -1,0 +1,17 @@
+i32_eqz 0
+i32_eqz 1
+i32_eqz -1
+i32_eqz 2
+i32_eqz 3
+i32_eqz 4
+i32_eqz 5
+i32_eqz 6
+i32_eqz 7
+i32_eqz 8
+i32_eqz 9
+i32_eqz 10
+i32_eqz -10
+i32_eqz 1234
+i32_eqz 2147483647
+i32_eqz -2147483648
+
