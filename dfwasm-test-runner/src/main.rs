@@ -72,24 +72,17 @@ async fn main() -> Result<()> {
 fn create_root_template(module_tests: Vec<CompiledModuleTest>) -> Vec<Template> {
     let mut root_template = Template::start_function("root_test".to_string());
 
-    // Create a list of the test functions to call
-    let mut function_list_buffer = Vec::new();
-    for test in &module_tests {
-        function_list_buffer.push(Item::string(test.main_function_name.clone()));
+    let module_test_function_names = module_tests
+        .iter()
+        .map(|test| test.main_function_name.clone())
+        .collect::<Vec<_>>();
 
-        if function_list_buffer.len() == 26 {
-            let mut append_args = vec![Item::var("test_functions")];
-            append_args.extend(function_list_buffer.clone());
-
-            root_template.set_var("AppendValue", Args::with(append_args));
-            function_list_buffer.clear();
-        }
-    }
-
-    // Ensure the buffer is not empty
-    if !function_list_buffer.is_empty() {
+    // Create a list of test function names
+    // Chunk using 26 (27 args per block, including the test_functions var) to lessen code size
+    for name_chunk in module_test_function_names.chunks(26) {
         let mut append_args = vec![Item::var("test_functions")];
-        append_args.extend(function_list_buffer);
+        append_args.extend(name_chunk.iter().map(|name| Item::string(name.clone())));
+
         root_template.set_var("AppendValue", Args::with(append_args));
     }
 

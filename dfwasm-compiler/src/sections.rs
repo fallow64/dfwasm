@@ -339,55 +339,42 @@ fn compile_data_initialization(
         } => offset_expr,
     };
 
-    let offset = compiler.eval_const_expr_as_offset(&offset_expr)?;
+    let mem_offset = compiler.eval_const_expr_as_offset(&offset_expr)?;
 
     match compiler.options.batch_data_size {
         Some(batch_size) => {
-            let mut initial_memory_address = offset;
-            let mut buffer = Vec::new();
+            let mut mem_address = mem_offset;
 
-            for byte in data_definition.data {
-                buffer.push(*byte);
-                if buffer.len() == batch_size {
-                    let mut args = vec![num(format_df_number_usize(initial_memory_address))];
-                    args.extend(
-                        buffer
-                            .iter()
-                            .map(|byte| num(format_df_number_u64((*byte).into())))
-                            .collect::<Vec<_>>(),
-                    );
+            let mut bytes = data_definition.data.iter();
+            loop {
+                // Take a chunk of data
+                let chunk = bytes
+                    .by_ref()
+                    .take(batch_size)
+                    .map(|byte| num(format_df_number_u64((*byte).into())))
+                    .collect::<Vec<_>>();
+                let chunk_len = chunk.len();
 
-                    // Call the batch function
-                    module_template.call_function(DF_FUNC_BATCH_DATA_SECTION, Args::with(args));
-
-                    // Reset the buffer and bump the address
-                    buffer.clear();
-                    initial_memory_address += batch_size;
+                // If the chunk is empty, break
+                if chunk.is_empty() {
+                    break;
                 }
-            }
 
-            // Clear out the buffer
-            if !buffer.is_empty() {
-                let mut args = vec![num(format_df_number_usize(initial_memory_address))];
+                // Create the arguments for the function call
+                let mut args = vec![num(format_df_number_usize(mem_address))];
+                args.extend(chunk);
 
-                args.extend(
-                    buffer
-                        .iter()
-                        .map(|byte| num(format_df_number_u64((*byte).into())))
-                        .collect::<Vec<_>>(),
-                );
+                // Add to the memory address
+                mem_address += chunk_len;
 
-                // Call the batch function
+                // Call the function
                 module_template.call_function(DF_FUNC_BATCH_DATA_SECTION, Args::with(args));
-
-                // Reset the buffer and bump the address
-                buffer.clear();
             }
         }
         None => {
             // Append the data, one block for one byte
             for (i, byte) in data_definition.data.iter().enumerate() {
-                let memory_address = format_df_number_usize(offset + i);
+                let memory_address = format_df_number_usize(mem_offset + i);
                 module_template.set_var(
                     "=",
                     Args::with(vec![
