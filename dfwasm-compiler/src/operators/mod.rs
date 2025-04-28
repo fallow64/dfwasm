@@ -238,14 +238,15 @@ fn handle_debugger_call(compiler: &mut DFWasmCompiler, operator: &Operator, loca
         return;
     }
 
-    // Skip blocks, loops, and ends to functions
+    // Skip blocks, loops, ends to functions, and elses
     let is_control_flow_start = matches!(operator, Operator::Block { .. } | Operator::Loop { .. });
     let is_function_end = matches!(
         compiler.control_stack.last(),
         Some(ControlStackEntry::FunctionStart(_))
     ) && matches!(operator, Operator::End);
+    let is_else = matches!(operator, Operator::Else);
 
-    if is_control_flow_start || is_function_end {
+    if is_control_flow_start || is_function_end || is_else {
         return;
     }
 

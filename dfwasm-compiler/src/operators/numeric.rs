@@ -273,16 +273,7 @@ pub fn compile_numeric_operator(
                 .push_op_stack(var("$res"));
         }
         Operator::I64Mul => {
-            // I64Mul: Pops two values from the stack and pushes their product.
-            // stack: $a, $b -> $result
-
-            // We have to multiply by 1000 to get the correct DF scaling
-            // 1000 * (a / 1000) * (b / 1000) = a * (b / 1000) = (a * b) / 1000
-
-            template
-                .pop_op_stack(var("$b"))
-                .pop_op_stack(var("$a"))
-                .push_op_stack(num("%math(1000 * %var($a) * %var($b))"));
+            template.call_function("$i64_mul", Args::default());
         }
         Operator::I32Mul => {
             // I64Mul: Pops two values from the stack and pushes their product.
@@ -335,7 +326,7 @@ pub fn compile_numeric_operator(
                 .push_op_stack(var("$res"));
         }
         Operator::I64DivU => {
-            // todo: 64bit unsigned
+            //todo: 64bit unsigned
             template
                 .pop_op_stack(var("$b"))
                 .pop_op_stack(var("$a"))
