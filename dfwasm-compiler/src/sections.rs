@@ -5,7 +5,10 @@ use wasmparser::{
     Data, DataKind, ElementItems, ElementKind, Encoding, ExternalKind, Payload, TableInit, TypeRef,
 };
 
-use crate::{DFWasmError, DFWasmResult, df_helper::DF_VAR_EXPORTS};
+use crate::{
+    DFWasmError, DFWasmResult,
+    df_helper::{DF_FUNC_MEM_STORE, DF_VAR_EXPORTS},
+};
 
 use super::{
     DFWasmCompiler,
@@ -373,11 +376,14 @@ fn compile_data_initialization(
             // Append the data, one block for one byte
             for (i, byte) in data_definition.data.iter().enumerate() {
                 let memory_address = format_df_number_usize(mem_offset + i);
-                module_template.set_var(
-                    "=",
+                module_template.call_function(
+                    DF_FUNC_MEM_STORE,
                     Args::with(vec![
-                        var(format!("$mem_{memory_address}")),
+                        num("1"),
+                        num(format_df_number_usize(0)),
+                        num(format_df_number_usize(0)),
                         num(format_df_number_u64((*byte).into())),
+                        num(format!("{memory_address}")),
                     ]),
                 );
             }

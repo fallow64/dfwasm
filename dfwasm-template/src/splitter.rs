@@ -1,7 +1,10 @@
+use std::collections::HashSet;
+
 use crate::{Args, Block, BracketDirection, Item, Template};
 
 /// The amount of blocks in a code block.
 const CODE_BLOCK_SIZE: usize = 2;
+const SAFE_SPACE: usize = 4;
 
 /// Splits a list of templates into smaller templates if they are too large.
 ///
@@ -10,12 +13,27 @@ const CODE_BLOCK_SIZE: usize = 2;
 /// - Global scope is not overly used (i.e. if statements should be a few blocks maximum).
 /// - Non-function templates cannot be split.
 pub fn split_templates(templates: Vec<Template>, max_size: usize) -> Vec<Template> {
+    let mut function_names = HashSet::new();
+    for template in &templates {
+        if let Some(Block::Function { name, .. }) = template.blocks.first() {
+            function_names.insert(name.clone());
+        }
+    }
+
     let mut stack = templates;
     let mut result = Vec::new();
 
     while let Some(mut template) = stack.pop() {
+        template.blocks.insert(
+            1,
+            Block::CallFunction {
+                args: Args::default(),
+                func: "$smallWait".to_string(),
+            },
+        );
+
         // If the template is small enough, add it to the result
-        if template.blocks.len() * CODE_BLOCK_SIZE <= max_size {
+        if template.blocks.len() * CODE_BLOCK_SIZE + SAFE_SPACE <= max_size {
             result.push(template);
             continue;
         }
@@ -29,7 +47,7 @@ pub fn split_templates(templates: Vec<Template>, max_size: usize) -> Vec<Templat
                     .filter(|(_, item)| !matches!(item, Item::Tag { .. }));
 
                 if non_tag_args.next().is_none() {
-                    get_next_function_name(name)
+                    get_next_function_name(name, &mut function_names)
                 } else {
                     panic!("Functions with parameters are not supported for splitting");
                 }
@@ -39,10 +57,10 @@ pub fn split_templates(templates: Vec<Template>, max_size: usize) -> Vec<Templat
 
         // Calculate the last global scope
         let last_global_scope = find_last_global_scope(&template.blocks, max_size);
+        dbg!(&new_function_name, &template.get_name(), &last_global_scope);
 
         // Create a new
-        let mut right_half =
-            Vec::with_capacity((template.blocks.len() - last_global_scope + 5) * 2);
+        let mut right_half = Vec::new();
 
         right_half.push(Block::Function {
             args: Args::default(),
@@ -63,6 +81,7 @@ pub fn split_templates(templates: Vec<Template>, max_size: usize) -> Vec<Templat
 
         // Now verify that the right half is also not too large
         stack.push(Template::new(right_half));
+        dbg!(&result.len(), &stack.len());
     }
 
     result
@@ -87,7 +106,7 @@ fn find_last_global_scope(blocks: &[Block], max_size: usize) -> usize {
                 BracketDirection::Close => bracket_depth -= 1,
             },
             _ => {
-                if (i + 1) * CODE_BLOCK_SIZE > max_size {
+                if (i + 1) * CODE_BLOCK_SIZE + SAFE_SPACE > max_size {
                     // We have reached the max size, so stop searching
                     break;
                 } else if bracket_depth == 0 {
@@ -102,17 +121,28 @@ fn find_last_global_scope(blocks: &[Block], max_size: usize) -> usize {
 }
 
 /// Given a function name, returns a new unique function name by incrementing the number at the end of the name.
-fn get_next_function_name(s: &str) -> String {
-    if let Some(pos) = s.rfind("--") {
+fn get_next_function_name(s: &str, function_names: &mut HashSet<String>) -> String {
+    let (prefix, mut n) = if let Some(pos) = s.rfind("--") {
+        let prefix = &s[..pos];
         let suffix = &s[pos + 2..];
-        if !suffix.is_empty() && suffix.chars().all(|c| c.is_ascii_digit()) {
-            if let Ok(n) = suffix.parse::<u32>() {
-                return format!("{}--{}", &s[..pos], n + 1);
-            }
+
+        if let Ok(n) = suffix.parse::<usize>() {
+            (prefix.to_string(), n)
+        } else {
+            (s.to_string(), 0)
+        }
+    } else {
+        (s.to_string(), 0)
+    };
+
+    loop {
+        n += 1;
+        let new_name = format!("{}--{}", prefix, n);
+        if !function_names.contains(&new_name) {
+            function_names.insert(new_name.clone());
+            return new_name;
         }
     }
-
-    format!("{s}--1",)
 }
 
 /// Splits a vector into two parts at the given index, moving the second part into the target vector.
