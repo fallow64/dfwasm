@@ -57,7 +57,6 @@ pub fn split_templates(templates: Vec<Template>, max_size: usize) -> Vec<Templat
 
         // Calculate the last global scope
         let last_global_scope = find_last_global_scope(&template.blocks, max_size);
-        dbg!(&new_function_name, &template.get_name(), &last_global_scope);
 
         // Create a new
         let mut right_half = Vec::new();
@@ -81,7 +80,6 @@ pub fn split_templates(templates: Vec<Template>, max_size: usize) -> Vec<Templat
 
         // Now verify that the right half is also not too large
         stack.push(Template::new(right_half));
-        dbg!(&result.len(), &stack.len());
     }
 
     result
