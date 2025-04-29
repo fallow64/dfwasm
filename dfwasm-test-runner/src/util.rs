@@ -53,7 +53,7 @@ pub fn clear_variables(template: &mut Template) {
     template.set_var(
         "PurgeVars",
         Args::with_tags(
-            vec![Item::string("$")],
+            vec![Item::string("wasm.$")],
             vec![
                 Item::Tag {
                     option: "Any part of name".to_string(),
