@@ -267,3 +267,10 @@ pub const DF_FUNC_CONTROL_LOOP_CHECK: &str = "wasm.internal.control_loop_check";
 pub const DF_VAR_CURRENT_STACK_FRAME: &str = "wasm.$current_stack_frame";
 pub const DF_VAR_EXPORTS: &str = "wasm.$exports";
 pub const DF_FUNC_HOOK_INSTRUCTION: &str = "wasm.internal.hook_instruction";
+
+pub fn get_local(local_index: u32) -> String {
+    format!(
+        "wasm.$frame%var({})_{}",
+        DF_VAR_CURRENT_STACK_FRAME, local_index
+    )
+}

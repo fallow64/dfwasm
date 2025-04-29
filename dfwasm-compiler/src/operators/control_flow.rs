@@ -195,7 +195,7 @@ pub fn compile_control_flow_operator(
                 DF_FUNC_TRAP,
                 Args::with(vec![
                     string("unreachable"),
-                    string(format!("{location:#06x}")),
+                    string(format!("{location:#x}")),
                 ]),
             );
         }
@@ -206,24 +206,25 @@ pub fn compile_control_flow_operator(
 }
 
 fn compile_branch_operator(compiler: &mut DFWasmCompiler, relative_control_stack_depth: u32) {
-    let mut control_stack_entry = None;
-    let mut loop_depth = 0;
+    // Get the control stack entry at the specified relative depth
+    let control_stack_idx =
+        compiler.control_stack.len() - 1 - relative_control_stack_depth as usize;
 
-    // todo: clean this up
-    for (i, entry) in compiler.control_stack.iter().rev().enumerate() {
-        if i == relative_control_stack_depth as usize {
-            control_stack_entry = Some(entry);
-            break;
-        }
+    let control_stack_entry = compiler
+        .control_stack
+        .get(control_stack_idx)
+        .expect("Control stack entry not found");
 
-        if matches!(
-            entry,
-            ControlStackEntry::Block(_) | ControlStackEntry::Loop(_)
-        ) {
-            loop_depth += 1;
-        }
-    }
-    let control_stack_entry = control_stack_entry.expect("Control stack entry not found");
+    // Count how many blocks/loops we need to break through
+    let loop_depth = compiler.control_stack[(control_stack_idx + 1)..]
+        .iter()
+        .filter(|entry| {
+            matches!(
+                entry,
+                ControlStackEntry::Block(_) | ControlStackEntry::Loop(_)
+            )
+        })
+        .count();
 
     match control_stack_entry {
         ControlStackEntry::Block(_) | ControlStackEntry::Loop(_) => {
