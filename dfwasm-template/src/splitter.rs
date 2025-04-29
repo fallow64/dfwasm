@@ -24,14 +24,6 @@ pub fn split_templates(templates: Vec<Template>, max_size: usize) -> Vec<Templat
     let mut result = Vec::new();
 
     while let Some(mut template) = stack.pop() {
-        template.blocks.insert(
-            1,
-            Block::CallFunction {
-                args: Args::default(),
-                func: "$smallWait".to_string(),
-            },
-        );
-
         // If the template is small enough, add it to the result
         if template.blocks.len() * CODE_BLOCK_SIZE + SAFE_SPACE <= max_size {
             result.push(template);

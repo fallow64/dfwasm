@@ -7,7 +7,9 @@ use memory::compile_memory_operator;
 use numeric::compile_numeric_operator;
 use table::compile_table_operator;
 
-use crate::{DFWasmError, DFWasmResult, compiler::ControlStackEntry};
+use crate::{
+    DFWasmError, DFWasmResult, compiler::ControlStackEntry, df_helper::DF_FUNC_HOOK_INSTRUCTION,
+};
 
 use super::{DFWasmCompiler, df_helper::string};
 
@@ -254,7 +256,7 @@ fn handle_debugger_call(compiler: &mut DFWasmCompiler, operator: &Operator, loca
 
     // Call into the debugger, with key/value information.
     template.call_function(
-        "debug",
+        DF_FUNC_HOOK_INSTRUCTION,
         Args::with(vec![
             string("df_function"),
             string(template.get_name().expect("No function name")),

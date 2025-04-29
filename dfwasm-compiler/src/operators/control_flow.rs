@@ -118,20 +118,10 @@ pub fn compile_control_flow_operator(
             compiler.control_stack.push(ControlStackEntry::Else(if_id));
         }
         Operator::End => {
-            match compiler.control_stack.pop() {
-                Some(control_entry) => match control_entry {
-                    ControlStackEntry::If(_) | ControlStackEntry::Else(_) => {
-                        // let template = compiler.get_current_template();
-                        // template.close_bracket();
-                    }
-                    ControlStackEntry::FunctionStart(_)
-                    | ControlStackEntry::Block(_)
-                    | ControlStackEntry::Loop(_) => {
-                        // do nothing because the finished template is already in compiler.templates
-                    }
-                },
-                None => panic!("Control stack is empty"),
-            }
+            // do nothing :)
+            // If/Else: The brackets are already closed
+            // Block/Loop: The brackets are already closed
+            // Function: Nothing to close
         }
         Operator::Br { relative_depth } => compile_branch_operator(compiler, relative_depth),
         Operator::BrIf { relative_depth } => {

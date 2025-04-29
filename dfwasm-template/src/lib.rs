@@ -903,7 +903,15 @@ impl Template {
     pub fn start_function(name: impl ToString) -> Self {
         Self {
             blocks: vec![Block::Function {
-                args: Args::default(),
+                args: Args::with_tags(
+                    vec![],
+                    vec![Item::Tag {
+                        option: "False".to_string(),
+                        tag: "Is Hidden".to_string(),
+                        action: "dynamic".to_string(),
+                        block: CodeBlock::Function,
+                    }],
+                ),
                 name: name.to_string(),
             }],
         }

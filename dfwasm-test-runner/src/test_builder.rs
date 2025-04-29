@@ -107,7 +107,7 @@ fn compile_test_case(
     });
     args.extend(df_inputs);
 
-    module_function.call_function("$expectEqual", Args::with(args));
+    module_function.call_function("wasm.internal.test_call", Args::with(args));
 
     Ok(())
 }

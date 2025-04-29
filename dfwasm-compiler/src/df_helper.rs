@@ -182,8 +182,9 @@ pub fn generate_function_name(index: usize, module_name: Option<&str>) -> String
 
 /// Generates a unique variable name based on the given table index.
 pub fn generate_table_name(index: usize) -> String {
-    format!("$table_{index}")
+    format!("wasm.$table_{index}")
 }
+
 /// Generates a unique block name based on the given block index.
 pub fn generate_block_name(index: usize, module_name: Option<&str>) -> String {
     match module_name {
@@ -226,44 +227,43 @@ pub fn string(value: impl Into<String>) -> Item {
 }
 
 /// The DF variable representing the operand stack. This is a list, so technically the max stack size is 10K.
-pub const DF_VAR_OP_STACK: &str = "$opStack";
+pub const DF_VAR_OP_STACK: &str = "wasm.$op_stack";
 /// The DF variable representing the current memory size.
-pub const DF_VAR_MEM_SIZE: &str = "$memSize";
+pub const DF_VAR_MEM_SIZE: &str = "wasm.$memSize";
 
 /// The DF variable representing the function store (i.e. a list of all of the compiled function names or imported functions).
-pub const DF_VAR_STORE_FUNCS: &str = "$storeFuncs";
+pub const DF_VAR_STORE_FUNCS: &str = "wasm.$store_funcs";
 /// The DF variable representing the tables store (i.e. a list of all of references to all of the tables).
-pub const DF_VAR_STORE_TABLES: &str = "$storeTables";
+pub const DF_VAR_STORE_TABLES: &str = "wasm.$store_tables";
 /// The DF variable representing the globals store (i.e. a list of all of the globals).
-pub const DF_VAR_STORE_GLOBALS: &str = "$storeGlobals";
+pub const DF_VAR_STORE_GLOBALS: &str = "$wasm.$store_globals";
 
 /// This function is called to call a WASM function. It takes in the function index and number of arguments.
-pub const DF_FUNC_CALL_FUNC: &str = "$callFunc";
+pub const DF_FUNC_CALL_FUNC: &str = "wasm.internal.call_func";
 /// This function is called to grow a table. It has parameters for the table index and the number of elements to grow,
 /// and pops off the stack the number of new elements.
-pub const DF_FUNC_GROW_TABLE: &str = "$growTable";
+pub const DF_FUNC_GROW_TABLE: &str = "wasm.internal.grow_table";
 /// This function is called to fill a table. It has parameters for the table index,
 /// and pops off the stack the number of elements to fill and the value to fill with.
-pub const DF_FUNC_FILL_TABLE: &str = "$fillTable";
+pub const DF_FUNC_FILL_TABLE: &str = "wasm.internal.fill_table";
 /// This function is called to load from memory. It has parameters for number of bytes and the offset,
 /// and pops off the stack the address to load from. It pushes the value to the stack.
-pub const DF_FUNC_MEM_LOAD: &str = "$memLoad";
+pub const DF_FUNC_MEM_LOAD: &str = "wasm.internal.mem_load";
 /// This function is called to store memory. It has parameters for number of bytes and the offset,
 /// and pops off the stack the value and the address to store to.
-pub const DF_FUNC_MEM_STORE: &str = "$memStore";
+pub const DF_FUNC_MEM_STORE: &str = "wasm.internal.mem_store";
 /// This function is called to sign extend a number. It has parameters for the   and to_bits,
 /// both divided by 1000. It pops off the stack the number to sign extend, and pushes the value to the stack.
-pub const DF_FUNC_SIGN_EXTEND: &str = "$signExtend";
+pub const DF_FUNC_SIGN_EXTEND: &str = "wasm.internal.sign_extend";
 /// This function is called when initializing a data section. It does not operate on the stack.
 /// It has one parameter for the memory address (including offset), and 26 bytes of data.
-pub const DF_FUNC_BATCH_DATA_SECTION: &str = "$batchDataSection";
+pub const DF_FUNC_BATCH_DATA_SECTION: &str = "wasm.internal.batch_data_section";
 
-pub const DF_FUNC_TRAP: &str = "$trap";
+pub const DF_FUNC_TRAP: &str = "wasm.internal.trap";
 
-pub const DF_VAR_BRANCH_COUNTER: &str = "$branchCounter";
-pub const DF_FUNC_CONTROL_LOOP_CHECK: &str = "$controlLoopCheck";
+pub const DF_VAR_BRANCH_COUNTER: &str = "wasm.$branch_counter";
+pub const DF_FUNC_CONTROL_LOOP_CHECK: &str = "wasm.internal.control_loop_check";
 
-pub const DF_VAR_CURRENT_STACK_FRAME: &str = "$currentStackFrame";
-pub const DF_VAR_EXPORTS: &str = "$exports";
-
-pub const DF_VAR_MODULE_INIT_FUNC: &str = "$moduleInitFunc";
+pub const DF_VAR_CURRENT_STACK_FRAME: &str = "wasm.$current_stack_frame";
+pub const DF_VAR_EXPORTS: &str = "wasm.$exports";
+pub const DF_FUNC_HOOK_INSTRUCTION: &str = "wasm.internal.hook_instruction";

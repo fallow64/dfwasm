@@ -5,7 +5,7 @@ use wasmparser::{ConstExpr, MemoryType, Operator, Parser, RecGroup};
 
 use crate::{
     DFWasmError, DFWasmResult,
-    df_helper::{DF_VAR_MEM_SIZE, DF_VAR_MODULE_INIT_FUNC, format_df_number_u64, string, var},
+    df_helper::{DF_VAR_MEM_SIZE, format_df_number_u64, var},
 };
 
 use super::{
@@ -116,13 +116,6 @@ impl<'a> DFWasmCompiler<'a> {
             None => "module_init".to_string(),
         };
         let mut module_template = Template::start_function(module_template_name.clone());
-        module_template.set_var(
-            "=",
-            Args::with(vec![
-                var(DF_VAR_MODULE_INIT_FUNC),
-                string(module_template_name),
-            ]),
-        );
 
         // Iterate over every section in the WASM file
         for section in parser.parse_all(self.wasm) {
