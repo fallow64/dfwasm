@@ -122,6 +122,10 @@ pub fn compile_control_flow_operator(
             // If/Else: The brackets are already closed
             // Block/Loop: The brackets are already closed
             // Function: Nothing to close
+            compiler
+                .control_stack
+                .pop()
+                .expect("Control stack is empty");
         }
         Operator::Br { relative_depth } => compile_branch_operator(compiler, relative_depth),
         Operator::BrIf { relative_depth } => {
@@ -202,9 +206,10 @@ pub fn compile_control_flow_operator(
 }
 
 fn compile_branch_operator(compiler: &mut DFWasmCompiler, relative_control_stack_depth: u32) {
-    let mut loop_depth = 0;
     let mut control_stack_entry = None;
+    let mut loop_depth = 0;
 
+    // todo: clean this up
     for (i, entry) in compiler.control_stack.iter().rev().enumerate() {
         if i == relative_control_stack_depth as usize {
             control_stack_entry = Some(entry);
@@ -219,8 +224,6 @@ fn compile_branch_operator(compiler: &mut DFWasmCompiler, relative_control_stack
         }
     }
     let control_stack_entry = control_stack_entry.expect("Control stack entry not found");
-
-    // dbg!(relative_depth, loop_depth, control_stack_entry);
 
     match control_stack_entry {
         ControlStackEntry::Block(_) | ControlStackEntry::Loop(_) => {
