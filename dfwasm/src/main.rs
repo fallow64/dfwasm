@@ -36,7 +36,7 @@ struct CLIArgs {
 struct OutputMethod {
     #[arg(
         short,
-        long,
+        long = "code-client",
         help = "Send templates via CodeClient API",
         group = "output"
     )]

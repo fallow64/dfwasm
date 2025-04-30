@@ -4,8 +4,8 @@ use wasmparser::Operator;
 use crate::{
     DFWasmCompiler, DFWasmResult,
     df_helper::{
-        DF_FUNC_CALL_FUNC, DF_VAR_CURRENT_STACK_FRAME, DF_VAR_STORE_GLOBALS, DF_VAR_STORE_TABLES,
-        TemplateExt, get_local_name, num, var,
+        DF_FUNC_CALL_FUNC, DF_VAR_STORE_GLOBALS, DF_VAR_STORE_TABLES, TemplateExt, get_local_name,
+        num, var,
     },
 };
 

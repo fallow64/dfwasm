@@ -191,9 +191,9 @@ pub fn compile_section(
                             .expect("function type of export");
 
                         let arg_count =
-                            DFWasmCompiler::arg_count_of_type(&func_type).expect("function type");
-                        let result_count = DFWasmCompiler::result_count_of_type(&func_type)
-                            .expect("function type");
+                            DFWasmCompiler::arg_count_of_type(func_type).expect("function type");
+                        let result_count =
+                            DFWasmCompiler::result_count_of_type(func_type).expect("function type");
 
                         // Add the function to the module template
                         module_template
@@ -416,7 +416,7 @@ fn compile_data_initialization(
                         num(format_df_number_usize(0)),
                         num(format_df_number_usize(0)),
                         num(format_df_number_u64((*byte).into())),
-                        num(format!("{memory_address}")),
+                        num(memory_address.to_string()),
                     ]),
                 );
             }

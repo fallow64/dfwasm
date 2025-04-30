@@ -269,7 +269,7 @@ pub fn compile_numeric_operator(
                     "&",
                     var("$res"),
                     num("%math(%var($a) - %var($b))"),
-                    num(format_df_number_u32(0xFFFFFFFFu32)),
+                    num(format_df_number_u32(0xFFFF_FFFFu32)),
                 )
                 .push_op_stack(var("$res"));
         }
@@ -294,7 +294,7 @@ pub fn compile_numeric_operator(
                 )
                 .push_op_stack(var("$res"));
         }
-        Operator::I64DivS => {
+        Operator::I64DivS | Operator::I32DivU => {
             template
                 .pop_op_stack(var("$b"))
                 .pop_op_stack(var("$a"))
@@ -328,12 +328,6 @@ pub fn compile_numeric_operator(
         }
         Operator::I64DivU => {
             //todo: 64bit unsigned
-            template
-                .pop_op_stack(var("$b"))
-                .pop_op_stack(var("$a"))
-                .push_op_stack(num("%math(%var($a) / %var($b) / 1000)"));
-        }
-        Operator::I32DivU => {
             template
                 .pop_op_stack(var("$b"))
                 .pop_op_stack(var("$a"))

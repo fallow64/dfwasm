@@ -21,13 +21,13 @@ pub fn compile_memory_operator(
         | Operator::I32Load { memarg }
         | Operator::F32Load { memarg } => compile_load(template, memarg, 4, None),
         Operator::I64Load { memarg } | Operator::F64Load { memarg } => {
-            compile_load(template, memarg, 8, None)
+            compile_load(template, memarg, 8, None);
         }
         Operator::I32Load8U { memarg } | Operator::I64Load8U { memarg } => {
-            compile_load(template, memarg, 1, None)
+            compile_load(template, memarg, 1, None);
         }
         Operator::I32Load16U { memarg } | Operator::I64Load16U { memarg } => {
-            compile_load(template, memarg, 2, None)
+            compile_load(template, memarg, 2, None);
         }
         Operator::I32Load8S { memarg } => compile_load(template, memarg, 1, Some(4)),
         Operator::I32Load16S { memarg } => compile_load(template, memarg, 2, Some(4)),
@@ -35,13 +35,13 @@ pub fn compile_memory_operator(
         Operator::I64Load16S { memarg } => compile_load(template, memarg, 2, Some(8)),
         Operator::I64Load32S { memarg } => compile_load(template, memarg, 4, Some(8)),
         Operator::I32Store { memarg } | Operator::F32Store { memarg } => {
-            compile_store(template, memarg, 4, None)
+            compile_store(template, memarg, 4, None);
         }
         Operator::I64Store { memarg } | Operator::F64Store { memarg } => {
-            compile_store(template, memarg, 8, None)
+            compile_store(template, memarg, 8, None);
         }
         Operator::I32Store8 { memarg } | Operator::I64Store8 { memarg } => {
-            compile_store(template, memarg, 1, Some(8))
+            compile_store(template, memarg, 1, Some(8));
         }
         Operator::I32Store16 { memarg } | Operator::I64Store16 { memarg } => {
             compile_store(template, memarg, 2, Some(16))

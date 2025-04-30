@@ -175,7 +175,7 @@ pub fn format_df_number_usize(value: usize) -> String {
 /// Generates a unique function name based on the given function index.
 pub fn generate_function_name(index: usize, module_name: Option<&str>) -> String {
     match module_name {
-        Some(name) => format!("wasm.{}.func_{index}", name),
+        Some(name) => format!("wasm.{name}.func_{index}"),
         None => format!("wasm.module.func_{index}"),
     }
 }
