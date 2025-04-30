@@ -1,6 +1,6 @@
 use anyhow::{Result, anyhow};
 use dfwasm_template::{Args, CodeBlock, Item, Template};
-use wasmer::{Instance, Store, Value};
+use wasmi::{Instance, Store, Val, core::ValType};
 
 pub struct CompiledModuleTest {
     pub main_function_name: String,
@@ -13,38 +13,38 @@ pub struct TestCase {
     pub inputs: Vec<String>,
 }
 
-pub fn parse_string_to_wasmer_value(str_value: &str, ty: wasmer::Type) -> Result<Value> {
+pub fn parse_string_to_wasm_value(str_value: &str, ty: ValType) -> Result<Val> {
     match ty {
-        wasmer::Type::I32 => {
-            Ok(Value::from(str_value.parse::<i32>().unwrap_or_else(|e| {
-                panic!("Invalid i32: {str_value}. Error: {e}")
-            })))
-        }
-        wasmer::Type::I64 => {
-            Ok(Value::from(str_value.parse::<i64>().unwrap_or_else(|e| {
-                panic!("Invalid i64: {str_value}. Error: {e}")
-            })))
-        }
+        ValType::I32 => Ok(Val::I32(
+            str_value
+                .parse::<i32>()
+                .map_err(|_| anyhow!("Invalid i32"))?,
+        )),
+        ValType::I64 => Ok(Val::I64(
+            str_value
+                .parse::<i64>()
+                .map_err(|_| anyhow!("Invalid i64"))?,
+        )),
         _ => Err(anyhow!("Unsupported type")),
     }
 }
 
-pub fn parse_string_to_df_value(str_value: &str, ty: wasmer::Type) -> Result<Item> {
+pub fn parse_string_to_df_value(str_value: &str, ty: ValType) -> Result<Item> {
     match ty {
-        wasmer::Type::I32 => Ok(Item::num(format_df_number_i32(
+        ValType::I32 => Ok(Item::num(format_df_number_i32(
             str_value.parse::<i32>().expect("Invalid i32"),
         ))),
-        wasmer::Type::I64 => Ok(Item::num(format_df_number_i64(
+        ValType::I64 => Ok(Item::num(format_df_number_i64(
             str_value.parse::<i64>().expect("Invalid i64"),
         ))),
         _ => Err(anyhow!("Unsupported type")),
     }
 }
 
-pub fn wasmer_value_to_df_value(value: &Value) -> Result<Item> {
+pub fn wasm_value_to_df_value(value: &Val) -> Result<Item> {
     match value {
-        Value::I32(i) => Ok(Item::num(format_df_number_i32(*i))),
-        Value::I64(i) => Ok(Item::num(format_df_number_i64(*i))),
+        Val::I32(i) => Ok(Item::num(format_df_number_i32(*i))),
+        Val::I64(i) => Ok(Item::num(format_df_number_i64(*i))),
         _ => Err(anyhow!("Unsupported type")),
     }
 }
@@ -128,47 +128,42 @@ pub fn format_df_number_i32(value: i32) -> String {
 }
 
 /// Returns `(inputs, expected results)`
-pub fn get_wasmer_results(
+pub fn get_wasm_results<'a>(
     case: &TestCase,
-    store: &mut Store,
-    wasmer_instance: &mut Instance,
+    store: &mut Store<u32>,
+    instance: &mut Instance,
 ) -> Result<(Vec<Item>, Vec<Item>)> {
-    // First, get the expected output(s)
+    // Parse the module input types so we can convert our string test cases to the correct types
+    let export_type = instance
+        .get_export(&store, &case.function_name)
+        .unwrap_or_else(|| panic!("Function {} not found in module", case.function_name))
+        .ty(&store);
+    let function_type = export_type
+        .func()
+        .unwrap_or_else(|| panic!("Export {} is not a function", case.function_name));
 
-    // Parse the module input types
-    let export_type = wasmer_instance
-        .module()
-        .exports()
-        .functions()
-        .find(|f| f.name() == case.function_name)
-        .ok_or_else(|| {
-            anyhow!(
-                "Function {:?} not found in module exports",
-                case.function_name
-            )
-        })?;
-
-    let function_type = export_type.ty();
-
-    // Parse the inputs as the correct type
     let input_types = function_type.params();
+    let result_types = function_type.results();
+
+    // Parse the string inputs as WASM values
     let inputs = case
         .inputs
         .iter()
         .zip(input_types)
-        .map(|(str_value, ty)| parse_string_to_wasmer_value(str_value, *ty))
+        .map(|(str_value, ty)| parse_string_to_wasm_value(str_value, *ty))
         .collect::<Result<Vec<_>>>()?;
 
     // Call the function, and now we have our expected output
-    let result = wasmer_instance
-        .exports
-        .get_function(&case.function_name)?
-        .call(store, &inputs)?;
+    let mut results = vec![Val::I32(0); result_types.len()];
+    instance
+        .get_func(&store, &case.function_name)
+        .expect("Function not found")
+        .call(store, &inputs, results.as_mut())?;
 
     // Convert the result to a DF value
-    let df_results = result
+    let df_results = results
         .iter()
-        .map(wasmer_value_to_df_value)
+        .map(wasm_value_to_df_value)
         .collect::<Result<Vec<_>>>()?;
 
     // Convert the inputs to DF values

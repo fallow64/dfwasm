@@ -3,11 +3,11 @@ use std::{fs, path::Path};
 use anyhow::Result;
 use dfwasm_compiler::{DFWasmCompiler, DFWasmCompilerOptions};
 use dfwasm_template::{Args, Item, Location, Template};
-use wasmer::{Instance, Module, Store, wat2wasm};
+use wasmi::{Engine, Instance, Linker, Module, Store};
 
 use crate::{
     TEST_COMPILER_OPTIONS,
-    util::{CompiledModuleTest, TestCase, clear_variables, get_wasmer_results, parse_input_file},
+    util::{CompiledModuleTest, TestCase, clear_variables, get_wasm_results, parse_input_file},
 };
 
 /// Compiles a module to test from a WAT file.
@@ -19,8 +19,7 @@ use crate::{
 /// This is compared to what `wasmer` returns from the same code, and DF code is generated
 /// to ensure they have the same result.
 pub fn compile_module_from_path(wat_path: &Path) -> Result<CompiledModuleTest> {
-    let wat_contents = fs::read(wat_path)?;
-    let wasm = wat2wasm(&wat_contents)
+    let wasm = wat::parse_file(wat_path)
         .unwrap_or_else(|e| panic!("Invalid wat file {}: {}", wat_path.display(), e));
 
     let module_name = wat_path
@@ -62,14 +61,13 @@ fn compile_module(test_name: &str, wasm: &[u8], cases: &[TestCase]) -> Result<Co
         },
     )?;
 
-    // Create a wasmer instance
+    // Create a wasmi instance
 
-    // note: since this is shared between all test cases, technically the global state
-    // persists between test cases.
-    let mut store = Store::default();
-    let module = Module::new(&store, wasm)?;
-    let import_object = wasmer::imports! {}; // no imports
-    let mut instance = Instance::new(&mut store, &module, &import_object)?;
+    let engine = Engine::default();
+    let module = Module::new(&engine, wasm)?;
+    let mut store = Store::new(&engine, 42);
+    let linker = <Linker<u32>>::new(&engine);
+    let mut instance = linker.instantiate(&mut store, &module)?.start(&mut store)?;
 
     for case in cases {
         // Compile the individual test case
@@ -89,10 +87,10 @@ fn compile_module(test_name: &str, wasm: &[u8], cases: &[TestCase]) -> Result<Co
 fn compile_test_case(
     module_function: &mut Template,
     case: &TestCase,
-    store: &mut Store,
+    store: &mut Store<u32>,
     wasmer_instance: &mut Instance,
 ) -> Result<()> {
-    let (df_inputs, df_expected_results) = get_wasmer_results(case, store, wasmer_instance)?;
+    let (df_inputs, df_expected_results) = get_wasm_results(case, store, wasmer_instance)?;
 
     let mut args = vec![
         Item::string(case.module_name.clone()),
