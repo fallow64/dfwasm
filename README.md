@@ -15,9 +15,12 @@ This allows you to write code in a language that compiles to WASM, and then use 
 ### Obtaining a WASM file
 
 You will first need a `.wasm` file. There are several ways to compile to WASM. Here are a few options:
-- AssemblyScript: A TypeScript-like language that compiles to WASM.
-- Rust: A systems programming language (that this project is written in) that can compile to WASM. See [this thread](https://stackoverflow.com/questions/60980310/how-do-i-compile-a-rust-project-to-wasm-without-using-wasm-pack) for how to compile a Rust project without using wasm-pack or wasm-bindgen.
-- C/C++: You can use Emscripten or clang to compile C/C++ code to WASM.
+- **Rust**: A systems programming language (that this project is written in) that can compile to WASM.
+
+  An example Rust to DF project can be found at [`github.com/fallow64/dfwasm-example-project`](https://github.com/fallow64/dfwasm-example-project).
+
+- **AssemblyScript**: A TypeScript-like language that compiles to WASM.
+- **C/C++**: You can use Emscripten or clang to compile C/C++ code to WASM.
 - Many more options are available. Here is a [list of languages that can compile to WASM](https://github.com/appcypher/awesome-wasm-langs).
 
 Whichever option you choose, I highly recommend using a language with a small runtime and features to disable the standard library. This will help reduce the size of the generated WASM file and let it fit within a DiamondFire plot.
