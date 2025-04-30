@@ -10,5 +10,5 @@ keywords.workspace = true
 
 [dependencies]
 wasmparser = "0.228.0"
-dfwasm-template = { path = "../dfwasm-template" }
+dfwasm-template = { version = "0.1.0", path = "../dfwasm-template" }
 thiserror = "2.0.12"

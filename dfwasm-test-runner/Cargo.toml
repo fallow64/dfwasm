@@ -11,8 +11,10 @@ edition.workspace = true
 keywords.workspace = true
 
 [dependencies]
-dfwasm-compiler = { path = "../dfwasm-compiler" }
-dfwasm-template = { path = "../dfwasm-template", features = ["codeclient"] }
+dfwasm-compiler = { version = "0.1.0", path = "../dfwasm-compiler" }
+dfwasm-template = { version = "0.1.0", path = "../dfwasm-template", features = [
+    "codeclient",
+] }
 tokio = { version = "1.44.2", features = ["rt-multi-thread", "macros"] }
 wasmer = "5.0.4"
 anyhow = "1.0.98"
