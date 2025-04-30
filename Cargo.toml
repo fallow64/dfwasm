@@ -8,3 +8,4 @@ authors = ["fallow64"]
 license = "MIT"
 version = "0.1.0"
 edition = "2024"
+keywords = ["diamondfire", "dfwasm"]

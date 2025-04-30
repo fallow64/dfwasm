@@ -6,6 +6,7 @@ authors.workspace = true
 license.workspace = true
 version.workspace = true
 edition.workspace = true
+keywords.workspace = true
 
 [features]
 codeclient = ["dep:tokio", "dep:tokio-tungstenite", "dep:futures-util"]
