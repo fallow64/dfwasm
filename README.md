@@ -17,7 +17,7 @@ This allows you to write code in a language that compiles to WASM, and then use 
 You will first need a `.wasm` file. There are several ways to compile to WASM. Here are a few options:
 - **Rust**: A systems programming language (that this project is written in) that can compile to WASM.
 
-  An example Rust to DF project can be found at [`github.com/fallow64/dfwasm-example-project`](https://github.com/fallow64/dfwasm-example-project).
+  An example Rust to DF project can be found at [github.com/fallow64/dfwasm-example-project](https://github.com/fallow64/dfwasm-example-project).
 
 - **AssemblyScript**: A TypeScript-like language that compiles to WASM.
 - **C/C++**: You can use Emscripten or clang to compile C/C++ code to WASM.
