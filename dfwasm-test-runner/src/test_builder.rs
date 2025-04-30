@@ -39,14 +39,14 @@ pub fn compile_module_from_path(wat_path: &Path) -> Result<CompiledModuleTest> {
 
 /// Compiles a module to test given the bytes of the WASM file and the test cases.
 fn compile_module(test_name: &str, wasm: &[u8], cases: &[TestCase]) -> Result<CompiledModuleTest> {
-    let module_function_name = format!("test_{test_name}");
-    let mut module_function = Template::start_function(module_function_name.clone());
+    let module_function_name = format!("wasm.test.{test_name}");
+    let mut module_function = Template::start_function_hidden(module_function_name.clone());
 
     // Clear variables
     clear_variables(&mut module_function);
 
     // Call the module's init (todo: maybe return this from DFWasmCompiler?)
-    module_function.call_function(format!("{test_name}_module_init"), Args::default());
+    module_function.call_function(format!("wasm.{test_name}.init"), Args::default());
 
     // Send debug message
     module_function.print(Args::with(vec![Item::Text {

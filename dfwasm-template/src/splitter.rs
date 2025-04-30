@@ -14,6 +14,7 @@ const SAFE_SPACE: usize = 4;
 /// - Non-function templates cannot be split.
 pub fn split_templates(templates: Vec<Template>, max_size: usize) -> Vec<Template> {
     let mut function_names = HashSet::new();
+
     for template in &templates {
         if let Some(Block::Function { name, .. }) = template.blocks.first() {
             function_names.insert(name.clone());
@@ -51,15 +52,14 @@ pub fn split_templates(templates: Vec<Template>, max_size: usize) -> Vec<Templat
         let last_global_scope = find_last_global_scope(&template.blocks, max_size);
 
         // Create a new
-        let mut right_half = Vec::new();
-
-        right_half.push(Block::Function {
-            args: Args::default(),
-            name: new_function_name.clone(),
-        });
+        let mut right_template = Template::start_function_hidden(new_function_name.clone());
 
         // Split the blocks at the last global scope
-        split_into_existing(&mut template.blocks, last_global_scope, &mut right_half);
+        split_into_existing(
+            &mut template.blocks,
+            last_global_scope,
+            &mut right_template.blocks,
+        );
 
         // Insert the new function call at the end of the left half
         template.blocks.push(Block::CallFunction {
@@ -71,7 +71,7 @@ pub fn split_templates(templates: Vec<Template>, max_size: usize) -> Vec<Templat
         result.push(template);
 
         // Now verify that the right half is also not too large
-        stack.push(Template::new(right_half));
+        stack.push(right_template);
     }
 
     result

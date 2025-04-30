@@ -4,8 +4,9 @@ use wasmparser::Operator;
 use crate::{
     DFWasmCompiler, DFWasmResult,
     df_helper::{
-        DF_FUNC_SIGN_EXTEND, TemplateExt, format_df_number_i32, format_df_number_i64,
-        format_df_number_u32, format_df_number_u64, format_df_number_usize, num, var,
+        DF_FUNC_I64_MUL, DF_FUNC_SIGN_EXTEND, TemplateExt, format_df_number_i32,
+        format_df_number_i64, format_df_number_u32, format_df_number_u64, format_df_number_usize,
+        num, var,
     },
 };
 
@@ -273,7 +274,7 @@ pub fn compile_numeric_operator(
                 .push_op_stack(var("$res"));
         }
         Operator::I64Mul => {
-            template.call_function("$i64_mul", Args::default());
+            template.call_function(DF_FUNC_I64_MUL, Args::default());
         }
         Operator::I32Mul => {
             // I64Mul: Pops two values from the stack and pushes their product.

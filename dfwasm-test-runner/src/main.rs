@@ -85,7 +85,7 @@ async fn main() -> Result<()> {
 /// Creates the root template for the module tests.
 /// Splits the module tests into multiple templates if they exceed the maximum size.
 fn create_root_template(module_tests: Vec<CompiledModuleTest>) -> Vec<Template> {
-    let mut root_template = Template::start_function("root_test".to_string());
+    let mut root_template = Template::start_function("wasm.test".to_string());
 
     let module_test_function_names = module_tests
         .iter()

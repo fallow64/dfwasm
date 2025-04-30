@@ -1,15 +1,15 @@
 use std::{rc::Rc, vec};
 
-use dfwasm_template::{Args, Block, Item, Template, split_templates};
+use dfwasm_template::{split_templates, Args, Block, Item, Template};
 use wasmparser::{ConstExpr, MemoryType, Operator, Parser, RecGroup};
 
 use crate::{
+    df_helper::{format_df_number_u64, var, DF_VAR_MEM_SIZE},
     DFWasmError, DFWasmResult,
-    df_helper::{DF_VAR_MEM_SIZE, format_df_number_u64, var},
 };
 
 use super::{
-    df_helper::{DF_FUNC_CALL_FUNC, format_df_number_i64, num},
+    df_helper::{format_df_number_i64, num, DF_FUNC_CALL_FUNC},
     sections::compile_section,
 };
 
@@ -112,8 +112,8 @@ impl<'a> DFWasmCompiler<'a> {
 
         // Module template is what is called to initialize the module
         let module_template_name = match &self.options.module_name {
-            Some(name) => format!("{}_module_init", name),
-            None => "module_init".to_string(),
+            Some(name) => format!("wasm.{}.init", name),
+            None => "wasm.module.init".to_string(),
         };
         let mut module_template = Template::start_function(module_template_name.clone());
 

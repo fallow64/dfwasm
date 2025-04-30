@@ -5,7 +5,7 @@ use crate::{
     DFWasmCompiler, DFWasmResult,
     df_helper::{
         DF_FUNC_CALL_FUNC, DF_VAR_CURRENT_STACK_FRAME, DF_VAR_STORE_GLOBALS, DF_VAR_STORE_TABLES,
-        TemplateExt, get_local, num, var,
+        TemplateExt, get_local_name, num, var,
     },
 };
 
@@ -107,17 +107,14 @@ pub fn compile_basic_operator(
         Operator::LocalGet { local_index } => {
             // LocalGet: Gets a local variable by its index and pushes it to the stack.
 
-            let local_var_name = format!(
-                "wasm.$frame%var({})_{}",
-                DF_VAR_CURRENT_STACK_FRAME, local_index
-            );
+            let local_var_name = get_local_name(local_index);
 
             template.push_op_stack(var(local_var_name));
         }
         Operator::LocalSet { local_index } => {
             // LocalSet: Pops a value from the stack and sets it to a local variable.
 
-            let local_var_name = get_local(local_index);
+            let local_var_name = get_local_name(local_index);
 
             template
                 .pop_op_stack(var("$value"))
@@ -127,7 +124,7 @@ pub fn compile_basic_operator(
             // LocalTee: Pops a value from the stack and sets it to a local variable, but also
             // keeps the value on the stack
 
-            let local_var_name = get_local(local_index);
+            let local_var_name = get_local_name(local_index);
 
             template
                 .pop_op_stack(var("$tee"))

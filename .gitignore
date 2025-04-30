@@ -1,9 +1,6 @@
 /target
 /.vscode
+.DS_Store
 /doom/
 /playground/
 /web/
-/thoughts.md
-/dfwasm-test-runner/test_files/wat_single/
-
-.DS_Store

@@ -175,8 +175,8 @@ pub fn format_df_number_usize(value: usize) -> String {
 /// Generates a unique function name based on the given function index.
 pub fn generate_function_name(index: usize, module_name: Option<&str>) -> String {
     match module_name {
-        Some(name) => format!("{}_func_{index}", name),
-        None => format!("func_{index}"),
+        Some(name) => format!("wasm.{}.func_{index}", name),
+        None => format!("wasm.module.func_{index}"),
     }
 }
 
@@ -188,24 +188,24 @@ pub fn generate_table_name(index: usize) -> String {
 /// Generates a unique block name based on the given block index.
 pub fn generate_block_name(index: usize, module_name: Option<&str>) -> String {
     match module_name {
-        Some(name) => format!("{name}_block_{index}"),
-        None => format!("block_{index}"),
+        Some(name) => format!("wasm.{name}.block_{index}"),
+        None => format!("wasm.module.{index}"),
     }
 }
 
 /// Generates a unique loop name based on the given loop index.
 pub fn generate_loop_name(index: usize, module_name: Option<&str>) -> String {
     match module_name {
-        Some(name) => format!("{name}_loop_{index}"),
-        None => format!("loop_{index}"),
+        Some(name) => format!("wasm.{name}.loop_{index}"),
+        None => format!("wasm.module.loop_{index}"),
     }
 }
 
 /// Generates a unique conditional name based on the given conditional index.
 pub fn generate_conditional_name(index: usize, module_name: Option<&str>) -> String {
     match module_name {
-        Some(name) => format!("{name}_if_{index}"),
-        None => format!("if_{index}"),
+        Some(name) => format!("wasm.{name}.if_{index}"),
+        None => format!("wasm.module.if_{index}"),
     }
 }
 
@@ -236,7 +236,7 @@ pub const DF_VAR_STORE_FUNCS: &str = "wasm.$store_funcs";
 /// The DF variable representing the tables store (i.e. a list of all of references to all of the tables).
 pub const DF_VAR_STORE_TABLES: &str = "wasm.$store_tables";
 /// The DF variable representing the globals store (i.e. a list of all of the globals).
-pub const DF_VAR_STORE_GLOBALS: &str = "$wasm.$store_globals";
+pub const DF_VAR_STORE_GLOBALS: &str = "wasm.$store_globals";
 
 /// This function is called to call a WASM function. It takes in the function index and number of arguments.
 pub const DF_FUNC_CALL_FUNC: &str = "wasm.internal.call_func";
@@ -265,12 +265,15 @@ pub const DF_VAR_BRANCH_COUNTER: &str = "wasm.$branch_counter";
 pub const DF_FUNC_CONTROL_LOOP_CHECK: &str = "wasm.internal.control_loop_check";
 
 pub const DF_VAR_CURRENT_STACK_FRAME: &str = "wasm.$current_stack_frame";
+pub const DF_VAR_IMPORTS: &str = "wasm.$imports";
 pub const DF_VAR_EXPORTS: &str = "wasm.$exports";
+pub const DF_VAR_EXPORT_SIGNATURES: &str = "wasm.$export_signatures";
 pub const DF_FUNC_HOOK_INSTRUCTION: &str = "wasm.internal.hook_instruction";
+pub const DF_FUNC_I64_MUL: &str = "wasm.internal.i64_mul";
 
-pub fn get_local(local_index: u32) -> String {
+pub fn get_local_name(local_index: u32) -> String {
     format!(
-        "wasm.$frame%var({})_{}",
+        "wasm.$frame%var({})_local_{}",
         DF_VAR_CURRENT_STACK_FRAME, local_index
     )
 }

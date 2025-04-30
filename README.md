@@ -15,7 +15,7 @@ This allows you to write code in a language that compiles to WASM, and then use 
 ### Obtaining a WASM file
 
 You will first need a `.wasm` file. There are several ways to compile to WASM. Here are a few options:
-- [AssemblyScript](https://www.assemblyscript.org/): A TypeScript-like language that compiles to WASM.
+- AssemblyScript: A TypeScript-like language that compiles to WASM.
 - Rust: A systems programming language (that this project is written in) that can compile to WASM. See [this thread](https://stackoverflow.com/questions/60980310/how-do-i-compile-a-rust-project-to-wasm-without-using-wasm-pack) for how to compile a Rust project without using wasm-pack or wasm-bindgen.
 - C/C++: You can use Emscripten or clang to compile C/C++ code to WASM.
 - Many more options are available. Here is a [list of languages that can compile to WASM](https://github.com/appcypher/awesome-wasm-langs).
@@ -54,7 +54,7 @@ The project is divided into several Cargo packages:
 
 ## Roadmap
 
-- [ ] An automated test suite.
+- [x] An automated test suite.
 - [ ] Add the [utility functions](/dfwasm-compiler/src/df_helper.rs#L=241) to the compiler.
 - [ ] Allow multiple modules to be initialized and ran at once.
 - [ ] Extract commonly used lists of instructions into a different function to reduce code duplication.

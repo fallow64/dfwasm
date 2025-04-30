@@ -7,7 +7,7 @@ use wasmparser::{
 
 use crate::{
     DFWasmError, DFWasmResult,
-    df_helper::{DF_FUNC_MEM_STORE, DF_VAR_EXPORTS},
+    df_helper::{DF_FUNC_MEM_STORE, DF_VAR_EXPORT_SIGNATURES, DF_VAR_EXPORTS, DF_VAR_IMPORTS},
 };
 
 use super::{
@@ -60,17 +60,24 @@ pub fn compile_section(
                         // Get the function type
                         let func_type = compiler.function_signatures[type_idx as usize].clone();
                         compiler.function_to_type_signature.push(func_type);
+
+                        let func_id = compiler.function_counter;
                         compiler.function_counter += 1;
 
-                        // todo: better way of handling imports
-                        // Add the function to the module template
-                        module_template.set_var(
-                            "AppendValue",
-                            Args::with(vec![
-                                var(DF_VAR_STORE_FUNCS),
-                                string(format!("{}/{}", import.module, import.name)),
-                            ]),
-                        );
+                        // Add a place holder value for the function
+                        module_template
+                            .set_var(
+                                "AppendValue",
+                                Args::with(vec![var(DF_VAR_STORE_FUNCS), num(-1)]),
+                            )
+                            .set_var(
+                                "SetDictValue",
+                                Args::with(vec![
+                                    var(DF_VAR_IMPORTS),
+                                    string(format!("{}:{}", import.module, import.name)),
+                                    num(func_id),
+                                ]),
+                            );
                     }
                     TypeRef::Table(..) => todo!("import table"),
                     TypeRef::Memory(memory_type) => {
@@ -178,16 +185,42 @@ pub fn compile_section(
                     ExternalKind::Func => {
                         // Get the function index
                         let func_index = export.index as usize;
+                        let func_type = compiler
+                            .function_to_type_signature
+                            .get(func_index)
+                            .expect("function type of export");
+
+                        let arg_count =
+                            DFWasmCompiler::arg_count_of_type(&func_type).expect("function type");
+                        let result_count = DFWasmCompiler::result_count_of_type(&func_type)
+                            .expect("function type");
 
                         // Add the function to the module template
-                        module_template.set_var(
-                            "SetDictValue",
-                            Args::with(vec![
-                                var(DF_VAR_EXPORTS),
-                                string(export.name),
-                                num(func_index),
-                            ]),
-                        );
+                        module_template
+                            .set_var(
+                                "SetDictValue",
+                                Args::with(vec![
+                                    var(DF_VAR_EXPORTS),
+                                    string(export.name),
+                                    num(func_index),
+                                ]),
+                            )
+                            .set_var(
+                                "CreateList",
+                                Args::with(vec![
+                                    var("$temp_arg_list"),
+                                    num(arg_count),
+                                    num(result_count),
+                                ]),
+                            )
+                            .set_var(
+                                "SetDictValue",
+                                Args::with(vec![
+                                    var(DF_VAR_EXPORT_SIGNATURES),
+                                    string(export.name),
+                                    var("$temp_arg_list"),
+                                ]),
+                            );
                     }
                     ExternalKind::Table
                     | ExternalKind::Memory
@@ -275,7 +308,7 @@ pub fn compile_section(
             // Create the function template
             compiler
                 .templates
-                .push(Template::start_function(func_name.clone()));
+                .push(Template::start_function_hidden(func_name.clone()));
 
             // Push to the control stack
             compiler
