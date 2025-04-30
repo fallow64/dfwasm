@@ -189,7 +189,7 @@ pub fn generate_table_name(index: usize) -> String {
 pub fn generate_block_name(index: usize, module_name: Option<&str>) -> String {
     match module_name {
         Some(name) => format!("wasm.{name}.block_{index}"),
-        None => format!("wasm.module.{index}"),
+        None => format!("wasm.module.block_{index}"),
     }
 }
 
