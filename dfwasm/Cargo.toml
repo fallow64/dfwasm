@@ -1,5 +1,6 @@
 [package]
 name = "dfwasm"
+description = "Main CLI for the dfwasm compiler"
 repository.workspace = true
 authors.workspace = true
 license.workspace = true

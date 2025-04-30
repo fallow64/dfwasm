@@ -1,5 +1,6 @@
 [package]
 name = "dfwasm-template"
+description = "A DiamondFire template serde schema"
 repository.workspace = true
 authors.workspace = true
 license.workspace = true

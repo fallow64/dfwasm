@@ -1,5 +1,6 @@
 [package]
 name = "dfwasm-test-runner"
+description = "A test runner for dfwasm"
 build = "build/build.rs"
 
 repository.workspace = true
