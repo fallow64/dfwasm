@@ -206,19 +206,11 @@ pub fn compile_section(
                                 ]),
                             )
                             .set_var(
-                                "CreateList",
-                                Args::with(vec![
-                                    var("$temp_arg_list"),
-                                    num(arg_count),
-                                    num(result_count),
-                                ]),
-                            )
-                            .set_var(
                                 "SetDictValue",
                                 Args::with(vec![
                                     var(DF_VAR_EXPORT_SIGNATURES),
                                     string(export.name),
-                                    var("$temp_arg_list"),
+                                    string(format!("{}:{}", arg_count, result_count)),
                                 ]),
                             );
                     }

@@ -54,9 +54,9 @@ pub struct DFWasmCompilerOptions {
 /// The WASM to DiamondFire compiler.
 pub struct DFWasmCompiler<'a> {
     /// The binary WASM file to compile
-    pub wasm: &'a [u8],
+    pub(crate) wasm: &'a [u8],
     /// The options to use when compiling
-    pub options: DFWasmCompilerOptions,
+    pub(crate) options: DFWasmCompilerOptions,
 
     /// The exported templates (also used as a working area for the compiler)
     pub(crate) templates: Vec<Template>,
