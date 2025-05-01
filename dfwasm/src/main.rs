@@ -18,17 +18,26 @@ struct CLIArgs {
     #[arg(
         short,
         long,
-        num_args(0..=1),
-        default_missing_value = "26",
+        default_value = "26",
         help = "Batch data section memory initializations by a certain size"
     )]
-    batch_data: Option<usize>,
+    batch_data: usize,
 
     #[command(flatten)]
     output: OutputMethod,
 
     #[arg(help = "The path to the WebAssembly file (or .wat)", value_hint = ValueHint::FilePath)]
     path: PathBuf,
+
+    #[arg(short, long, help = "The module name to use for the template")]
+    module: Option<String>,
+
+    #[arg(
+        short,
+        long,
+        help = "Whether to include calls to wasm.internal.small_wait"
+    )]
+    wait: bool,
 }
 
 #[derive(Args, Debug)]
@@ -54,6 +63,10 @@ struct OutputMethod {
 async fn main() {
     let cli_args = CLIArgs::parse();
 
+    if let Some("test" | "internal" | "") = cli_args.module.as_deref() {
+        eprintln!("Warning: Using a reserved module name. This may cause issues.");
+    }
+
     let bytes = match cli_args.path.extension() {
         Some(ext) if ext == "wasm" => std::fs::read(&cli_args.path)
             .unwrap_or_else(|_| panic!("Failed to read: {}", cli_args.path.display())),
@@ -70,12 +83,13 @@ async fn main() {
     let templates = DFWasmCompiler::compile_wasm(
         &bytes,
         DFWasmCompilerOptions {
-            module_name: None,
+            module_name: cli_args.module,
             debugger: cli_args.debugger,
             skip_nop_debugger: false,
             max_template_size: Some(cli_args.size),
-            batch_data_size: cli_args.batch_data,
+            batch_data_size: Some(cli_args.batch_data),
             only_include_module_init: false,
+            include_wait: cli_args.wait,
         },
     )
     .expect("Failed to parse wasm file");

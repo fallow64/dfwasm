@@ -20,6 +20,7 @@ pub const TEST_COMPILER_OPTIONS: DFWasmCompilerOptions = DFWasmCompilerOptions {
     max_template_size: Some(PLOT_SIZE),
     batch_data_size: None,
     only_include_module_init: false,
+    include_wait: true,
 };
 
 #[tokio::main]

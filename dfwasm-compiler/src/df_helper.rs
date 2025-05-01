@@ -270,6 +270,7 @@ pub const DF_VAR_EXPORTS: &str = "wasm.$exports";
 pub const DF_VAR_EXPORT_SIGNATURES: &str = "wasm.$export_signatures";
 pub const DF_FUNC_HOOK_INSTRUCTION: &str = "wasm.internal.hook_instruction";
 pub const DF_FUNC_I64_MUL: &str = "wasm.internal.i64_mul";
+pub const DF_FUNC_SMALL_WAIT: &str = "wasm.internal.small_wait";
 
 pub fn get_local_name(local_index: u32) -> String {
     format!(

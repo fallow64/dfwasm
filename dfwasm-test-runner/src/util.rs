@@ -128,7 +128,7 @@ pub fn format_df_number_i32(value: i32) -> String {
 }
 
 /// Returns `(inputs, expected results)`
-pub fn get_wasm_results<'a>(
+pub fn get_wasm_results(
     case: &TestCase,
     store: &mut Store<u32>,
     instance: &mut Instance,

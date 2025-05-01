@@ -1,15 +1,15 @@
 use std::{rc::Rc, vec};
 
-use dfwasm_template::{split_templates, Args, Block, Item, Template};
+use dfwasm_template::{Args, Block, Item, Template, split_templates};
 use wasmparser::{ConstExpr, MemoryType, Operator, Parser, RecGroup};
 
 use crate::{
-    df_helper::{format_df_number_u64, var, DF_VAR_MEM_SIZE},
     DFWasmError, DFWasmResult,
+    df_helper::{DF_FUNC_SMALL_WAIT, DF_VAR_MEM_SIZE, format_df_number_u64, var},
 };
 
 use super::{
-    df_helper::{format_df_number_i64, num, DF_FUNC_CALL_FUNC},
+    df_helper::{DF_FUNC_CALL_FUNC, format_df_number_i64, num},
     sections::compile_section,
 };
 
@@ -46,6 +46,9 @@ pub struct DFWasmCompilerOptions {
     /// Whether or not to only include the module init function in the template.
     /// Useful for debugging data section initialization.
     pub only_include_module_init: bool,
+    /// Whether or not to include calls to `wasm.internal.small_wait` at the start
+    /// of every template.
+    pub include_wait: bool,
 }
 
 /// The WASM to DiamondFire compiler.
@@ -145,8 +148,20 @@ impl<'a> DFWasmCompiler<'a> {
         if self.options.only_include_module_init {
             self.templates.clear();
         }
-
         self.templates.push(module_template);
+
+        if self.options.include_wait {
+            for template in &mut self.templates {
+                // Add a wait call
+                template.blocks.insert(
+                    1,
+                    Block::CallFunction {
+                        args: Args::default(),
+                        func: DF_FUNC_SMALL_WAIT.to_string(),
+                    },
+                );
+            }
+        }
 
         // Split the templates if they are too large
         if let Some(max_template_size) = self.options.max_template_size {
