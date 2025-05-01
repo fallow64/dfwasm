@@ -32,21 +32,23 @@ For some examples that already work, check out the [`examples`](/examples) direc
 In the root directory, run `cargo run` to run the compiler CLI.
 
 The arguments are as follows (may be updated, check `dfwasm --help` for help):
-- ```
-  Usage: dfwasm [OPTIONS] <--cc|--link> <PATH>
+```
+Usage: dfwasm [OPTIONS] <--code-client|--link> <PATH>
 
-  Arguments:
-  <PATH>  The path to the WebAssembly (or WAT) file
+Arguments:
+  <PATH>  The path to the WebAssembly file (or .wat)
 
-  Options:
-  -d, --debugger                   Include debugger function calls
-  -s, --size <SIZE>                The DiamondFire plot size [default: 301]
-  -b, --batch-data [<BATCH_DATA>]  Batch data section memory initializations by a certain size
-  -c, --cc                         Send templates via CodeClient API
-  -l, --link                       Send templates via dfonline.dev links
-  -h, --help                       Print help
-  -V, --version                    Print version
-  ```
+Options:
+  -d, --debugger                 Include debugger function calls
+  -s, --size <SIZE>              The DiamondFire plot size [default: 301]
+  -b, --batch-data <BATCH_DATA>  Batch data section memory initializations by a certain size [default: 26]
+  -c, --code-client              Send templates via CodeClient API
+  -l, --link                     Send templates via dfonline.dev links
+  -m, --module <MODULE>          The module name to use for the template
+  -w, --wait                     Whether to include calls to wasm.internal.small_wait
+  -h, --help                     Print help
+  -V, --version                  Print version
+```
 
 The project is divided into several Cargo packages:
 
