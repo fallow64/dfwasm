@@ -18,12 +18,12 @@ pub fn parse_string_to_wasm_value(str_value: &str, ty: ValType) -> Result<Val> {
         ValType::I32 => Ok(Val::I32(
             str_value
                 .parse::<i32>()
-                .map_err(|_| anyhow!("Invalid i32"))?,
+                .map_err(|_| anyhow!("Invalid i32: {str_value}"))?,
         )),
         ValType::I64 => Ok(Val::I64(
             str_value
                 .parse::<i64>()
-                .map_err(|_| anyhow!("Invalid i64"))?,
+                .map_err(|_| anyhow!("Invalid i64: {str_value}"))?,
         )),
         _ => Err(anyhow!("Unsupported type")),
     }
