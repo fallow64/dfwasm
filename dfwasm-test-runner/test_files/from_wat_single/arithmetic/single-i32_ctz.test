@@ -1,0 +1,17 @@
+i32_ctz 0
+i32_ctz 1
+i32_ctz -1
+i32_ctz 2
+i32_ctz 3
+i32_ctz 4
+i32_ctz 5
+i32_ctz 6
+i32_ctz 7
+i32_ctz 8
+i32_ctz 9
+i32_ctz 10
+i32_ctz -10
+i32_ctz 1234
+i32_ctz 2147483647
+i32_ctz -2147483648
+
