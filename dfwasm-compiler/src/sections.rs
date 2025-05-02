@@ -162,8 +162,6 @@ pub fn compile_section(
             // Get all globals, their types, and whether or not they're mutable
             for global in section {
                 let global = global?;
-                // todo: should we handle immutable/mutability here?
-
                 // Get the initial value
                 let init = compiler.eval_const_expr(&global.init_expr)?;
 
@@ -192,7 +190,7 @@ pub fn compile_section(
 
                         let arg_count =
                             DFWasmCompiler::arg_count_of_type(func_type).expect("function type");
-                        let result_count =
+                        let res_count =
                             DFWasmCompiler::result_count_of_type(func_type).expect("function type");
 
                         // Add the function to the module template
@@ -210,7 +208,7 @@ pub fn compile_section(
                                 Args::with(vec![
                                     var(DF_VAR_EXPORT_SIGNATURES),
                                     string(export.name),
-                                    string(format!("{}:{}", arg_count, result_count)),
+                                    string(format!("{arg_count}:{res_count}")),
                                 ]),
                             );
                     }
@@ -241,8 +239,9 @@ pub fn compile_section(
                         compiler.eval_const_expr_as_offset(&offset_expr)?,
                     ),
                     ElementKind::Passive | ElementKind::Declared => {
-                        // todo: what is this?
-                        return Err(DFWasmError::NotYetImplemented("passive/declared elements"));
+                        return Err(DFWasmError::NotYetImplemented(
+                            "passive/declared elements are not yet implemented",
+                        ));
                     }
                 };
 
@@ -267,7 +266,7 @@ pub fn compile_section(
                     }
                     ElementItems::Expressions(..) => {
                         return Err(DFWasmError::NotYetImplemented(
-                            "expression elements for tables",
+                            "expression elements for tables are not yet implemented",
                         ));
                     }
                 }
@@ -358,7 +357,11 @@ fn compile_data_initialization(
     data_definition: Data<'_>,
 ) -> DFWasmResult<()> {
     let offset_expr = match data_definition.kind {
-        DataKind::Passive => return Err(DFWasmError::NotYetImplemented("passive data sections")),
+        DataKind::Passive => {
+            return Err(DFWasmError::NotYetImplemented(
+                "passive data sections are not yet implemented",
+            ));
+        }
         DataKind::Active {
             memory_index: _,
             offset_expr,

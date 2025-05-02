@@ -58,14 +58,14 @@ pub fn write_test(
     }
 
     // create the wat file
-    let wat_file_path = test_dir.join(format!("{}.wat", base_name));
+    let wat_file_path = test_dir.join(format!("{base_name}.wat"));
     let mut wat_file = File::create(&wat_file_path).unwrap();
-    writeln!(wat_file, "{}", wat_file_contents).unwrap();
+    writeln!(wat_file, "{wat_file_contents}").unwrap();
 
     // create the cases file
-    let test_file_path = test_dir.join(format!("{}.test", base_name));
+    let test_file_path = test_dir.join(format!("{base_name}.test"));
     let mut test_file = File::create(&test_file_path).unwrap();
-    writeln!(test_file, "{}", test_file_contents).unwrap();
+    writeln!(test_file, "{test_file_contents}").unwrap();
 }
 
 fn main() {

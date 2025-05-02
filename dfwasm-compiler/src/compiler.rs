@@ -201,11 +201,8 @@ impl<'a> DFWasmCompiler<'a> {
         let result = match op {
             Operator::I32Const { value } => num(format_df_number_i64(value as i64)),
             Operator::I64Const { value } => num(format_df_number_i64(value)),
-            Operator::F32Const { value: _ } => todo!("float constant expressions"),
-            Operator::F64Const { value: _ } => todo!("float constant expressions"),
-            Operator::RefNull { hty: _ } => num(-1),
+            Operator::RefNull { hty: _ } => num("-1"),
             Operator::RefFunc { function_index } => num(function_index),
-            Operator::GlobalGet { global_index: _ } => todo!("global get within a const expr"),
             _ => return Err(DFWasmError::UnsupportedConstExpr),
         };
 
@@ -214,7 +211,6 @@ impl<'a> DFWasmCompiler<'a> {
         } else {
             match reader.read()? {
                 Operator::End => Ok(result),
-                // todo: should this be a separate error?
                 _ => Err(DFWasmError::UnsupportedConstExpr),
             }
         }
@@ -230,7 +226,6 @@ impl<'a> DFWasmCompiler<'a> {
         let result = match op {
             Operator::I32Const { value } => usize::from_le_bytes((value as i64).to_le_bytes()),
             Operator::I64Const { value } => usize::from_le_bytes(value.to_le_bytes()),
-            Operator::GlobalGet { global_index: _ } => todo!("global get within a const expr"),
             _ => return Err(DFWasmError::UnsupportedConstExpr),
         };
 
@@ -239,7 +234,6 @@ impl<'a> DFWasmCompiler<'a> {
         } else {
             match reader.read()? {
                 Operator::End => Ok(result),
-                // todo: should this be a separate error?
                 _ => Err(DFWasmError::UnsupportedConstExpr),
             }
         }

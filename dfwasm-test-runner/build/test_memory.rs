@@ -1,5 +1,6 @@
 use crate::{Type, clear_directory, numbers::I32_1, write_test};
 
+#[derive(Clone, Copy)]
 enum MemoryTestType {
     Store,
     Load,
@@ -11,8 +12,8 @@ fn build_memory_instruction_test(
     value_type: Type,
     tests: &[&[&str]],
 ) {
-    let function_name = instr.replace(".", "_");
-    let module_name = format!("single-{}", function_name);
+    let function_name = instr.replace('.', "_");
+    let module_name = format!("single-{function_name}");
 
     let load_instruction = match test_type {
         MemoryTestType::Load => instr,
@@ -51,7 +52,7 @@ fn build_memory_instruction_test(
     for test in tests {
         let call_args = test.iter().take(1).copied().collect::<Vec<_>>().join(" ");
 
-        test_file.push_str(&format!("{} {}\n", function_name, call_args));
+        test_file.push_str(&format!("{function_name} {call_args}\n"));
     }
 
     write_test(

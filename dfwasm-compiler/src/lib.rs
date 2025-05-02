@@ -84,7 +84,7 @@ pub enum DFWasmError {
     #[error("error: unknown payload")]
     UnknownPayload,
 
-    #[error("error: {0} are not yet implemented")]
+    #[error("error: {0}")]
     NotYetImplemented(&'static str),
 }
 

@@ -127,7 +127,7 @@ fn get_next_function_name(s: &str, function_names: &mut HashSet<String>) -> Stri
 
     loop {
         n += 1;
-        let new_name = format!("{}--{}", prefix, n);
+        let new_name = format!("{prefix}--{n}");
         if !function_names.contains(&new_name) {
             function_names.insert(new_name.clone());
             return new_name;

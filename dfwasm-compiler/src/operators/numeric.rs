@@ -1,8 +1,8 @@
-use dfwasm_template::Args;
+use dfwasm_template::{Args, Template};
 use wasmparser::Operator;
 
 use crate::{
-    DFWasmCompiler, DFWasmResult,
+    DFWasmCompiler, DFWasmError, DFWasmResult,
     df_helper::{
         DF_FUNC_I64_MUL, DF_FUNC_SIGN_EXTEND, TemplateExt, format_df_number_i32,
         format_df_number_i64, format_df_number_u32, format_df_number_u64, format_df_number_usize,
@@ -32,273 +32,72 @@ pub fn compile_numeric_operator(
                 .compare_and_push("=", var("$value"), num("0"));
         }
         Operator::I64Eq | Operator::I32Eq => {
-            template
-                .pop_op_stack(var("$b"))
-                .pop_op_stack(var("$a"))
-                .compare_and_push("=", var("$a"), var("$b"));
+            compile_comparison_operator(template, "=", false, false);
         }
         Operator::I64Ne | Operator::I32Ne => {
-            template
-                .pop_op_stack(var("$b"))
-                .pop_op_stack(var("$a"))
-                .compare_and_push("!=", var("$a"), var("$b"));
+            compile_comparison_operator(template, "!=", false, false);
         }
         Operator::I64LtS => {
-            template
-                .pop_op_stack(var("$b"))
-                .pop_op_stack(var("$a"))
-                .compare_and_push("<", var("$a"), var("$b"));
+            compile_comparison_operator(template, "<", false, false);
         }
         Operator::I32LtS => {
-            template
-                .call_function(
-                    DF_FUNC_SIGN_EXTEND,
-                    Args::with(vec![
-                        num(format_df_number_usize(32)),
-                        num(format_df_number_usize(64)),
-                    ]),
-                )
-                .pop_op_stack(var("$b"))
-                .call_function(
-                    DF_FUNC_SIGN_EXTEND,
-                    Args::with(vec![
-                        num(format_df_number_usize(32)),
-                        num(format_df_number_usize(64)),
-                    ]),
-                )
-                .pop_op_stack(var("$a"))
-                .compare_and_push("<", var("$a"), var("$b"));
+            compile_comparison_operator(template, "<", true, false);
         }
         Operator::I64GtS => {
-            template
-                .pop_op_stack(var("$b"))
-                .pop_op_stack(var("$a"))
-                .compare_and_push(">", var("$a"), var("$b"));
+            compile_comparison_operator(template, ">", false, false);
         }
         Operator::I32GtS => {
-            template
-                .call_function(
-                    DF_FUNC_SIGN_EXTEND,
-                    Args::with(vec![
-                        num(format_df_number_usize(32)),
-                        num(format_df_number_usize(64)),
-                    ]),
-                )
-                .pop_op_stack(var("$b"))
-                .call_function(
-                    DF_FUNC_SIGN_EXTEND,
-                    Args::with(vec![
-                        num(format_df_number_usize(32)),
-                        num(format_df_number_usize(64)),
-                    ]),
-                )
-                .pop_op_stack(var("$a"))
-                .compare_and_push(">", var("$a"), var("$b"));
+            compile_comparison_operator(template, ">", true, false);
         }
         Operator::I64LeS => {
-            template
-                .pop_op_stack(var("$b"))
-                .pop_op_stack(var("$a"))
-                .compare_and_push("<=", var("$a"), var("$b"));
+            compile_comparison_operator(template, "<=", false, false);
         }
         Operator::I32LeS => {
-            template
-                .call_function(
-                    DF_FUNC_SIGN_EXTEND,
-                    Args::with(vec![
-                        num(format_df_number_usize(32)),
-                        num(format_df_number_usize(64)),
-                    ]),
-                )
-                .pop_op_stack(var("$b"))
-                .call_function(
-                    DF_FUNC_SIGN_EXTEND,
-                    Args::with(vec![
-                        num(format_df_number_usize(32)),
-                        num(format_df_number_usize(64)),
-                    ]),
-                )
-                .pop_op_stack(var("$a"))
-                .compare_and_push("<=", var("$a"), var("$b"));
+            compile_comparison_operator(template, "<=", true, false);
         }
         Operator::I64GeS => {
-            template
-                .pop_op_stack(var("$b"))
-                .pop_op_stack(var("$a"))
-                .compare_and_push(">=", var("$a"), var("$b"));
+            compile_comparison_operator(template, ">=", false, false);
         }
         Operator::I32GeS => {
-            template
-                .call_function(
-                    DF_FUNC_SIGN_EXTEND,
-                    Args::with(vec![
-                        num(format_df_number_usize(32)),
-                        num(format_df_number_usize(64)),
-                    ]),
-                )
-                .pop_op_stack(var("$b"))
-                .call_function(
-                    DF_FUNC_SIGN_EXTEND,
-                    Args::with(vec![
-                        num(format_df_number_usize(32)),
-                        num(format_df_number_usize(64)),
-                    ]),
-                )
-                .pop_op_stack(var("$a"))
-                .compare_and_push(">=", var("$a"), var("$b"));
+            compile_comparison_operator(template, ">=", true, false);
         }
         Operator::I64GtU | Operator::I32GtU => {
-            template
-                .pop_op_stack(var("$b"))
-                .pop_op_stack(var("$a"))
-                .set_var_bitwise(
-                    "^",
-                    var("$b"),
-                    var("$b"),
-                    num(format_df_number_i64(i64::MIN)),
-                )
-                .set_var_bitwise(
-                    "^",
-                    var("$a"),
-                    var("$a"),
-                    num(format_df_number_i64(i64::MIN)),
-                )
-                .compare_and_push(">", var("$a"), var("$b"));
+            compile_comparison_operator(template, ">", false, true);
         }
         Operator::I64LtU | Operator::I32LtU => {
-            template
-                .pop_op_stack(var("$b"))
-                .pop_op_stack(var("$a"))
-                .set_var_bitwise(
-                    "^",
-                    var("$b"),
-                    var("$b"),
-                    num(format_df_number_i64(i64::MIN)),
-                )
-                .set_var_bitwise(
-                    "^",
-                    var("$a"),
-                    var("$a"),
-                    num(format_df_number_i64(i64::MIN)),
-                )
-                .compare_and_push("<", var("$a"), var("$b"));
+            compile_comparison_operator(template, "<", false, true);
         }
         Operator::I64LeU | Operator::I32LeU => {
-            template
-                .pop_op_stack(var("$b"))
-                .pop_op_stack(var("$a"))
-                .set_var_bitwise(
-                    "^",
-                    var("$b"),
-                    var("$b"),
-                    num(format_df_number_i64(i64::MIN)),
-                )
-                .set_var_bitwise(
-                    "^",
-                    var("$a"),
-                    var("$a"),
-                    num(format_df_number_i64(i64::MIN)),
-                )
-                .compare_and_push("<=", var("$a"), var("$b"));
+            compile_comparison_operator(template, "<=", false, true);
         }
         Operator::I64GeU | Operator::I32GeU => {
-            template
-                .pop_op_stack(var("$b"))
-                .pop_op_stack(var("$a"))
-                .set_var_bitwise(
-                    "^",
-                    var("$b"),
-                    var("$b"),
-                    num(format_df_number_i64(i64::MIN)),
-                )
-                .set_var_bitwise(
-                    "^",
-                    var("$a"),
-                    var("$a"),
-                    num(format_df_number_i64(i64::MIN)),
-                )
-                .compare_and_push(">=", var("$a"), var("$b"));
+            compile_comparison_operator(template, ">=", false, true);
         }
-        Operator::I32Clz => todo!(),
-        Operator::I32Ctz => todo!(),
-        Operator::I32Popcnt => todo!(),
-        Operator::I64Clz => todo!(),
-        Operator::I64Ctz => todo!(),
-        Operator::I64Popcnt => todo!(),
+        Operator::I64Clz | Operator::I32Clz => todo!(),
+        Operator::I64Ctz | Operator::I32Ctz => todo!(),
+        Operator::I64Popcnt | Operator::I32Popcnt => todo!(),
         Operator::I64Add => {
-            // I64Add: Pops two values from the stack and pushes their sum.
-            // stack: $a, $b -> $result
-
-            template
-                .pop_op_stack(var("$b"))
-                .pop_op_stack(var("$a"))
-                .push_op_stack(num("%math(%var($a) + %var($b))"));
+            compile_binary_operator(template, "%math(%var($a)+%var($b))", None);
         }
         Operator::I32Add => {
-            // I32Add: Pops two values from the stack and pushes their sum.
-            // stack: $a, $b -> $result
-
-            template
-                .pop_op_stack(var("$b"))
-                .pop_op_stack(var("$a"))
-                .set_var_bitwise(
-                    "&",
-                    var("$res"),
-                    num("%math(%var($a) + %var($b))"),
-                    num(format_df_number_u32(0xFFFF_FFFFu32)),
-                )
-                .push_op_stack(var("$res"));
+            compile_binary_operator(template, "%math(%var($a)+%var($b))", Some(u32::MAX));
         }
         Operator::I64Sub => {
-            // I64Sub: Pops two values from the stack and pushes their difference.
-            // stack: $a, $b -> $result
-
-            template
-                .pop_op_stack(var("$b"))
-                .pop_op_stack(var("$a"))
-                .push_op_stack(num("%math(%var($a) - %var($b))"));
+            compile_binary_operator(template, "%math(%var($a)-%var($b))", None);
         }
         Operator::I32Sub => {
-            // I32Sub: Pops two values from the stack and pushes their difference.
-            // stack: $a, $b -> $result
-
-            template
-                .pop_op_stack(var("$b"))
-                .pop_op_stack(var("$a"))
-                .set_var_bitwise(
-                    "&",
-                    var("$res"),
-                    num("%math(%var($a) - %var($b))"),
-                    num(format_df_number_u32(0xFFFF_FFFFu32)),
-                )
-                .push_op_stack(var("$res"));
+            compile_binary_operator(template, "%math(%var($a)-%var($b))", Some(u32::MAX));
         }
         Operator::I64Mul => {
+            // Due to precision issues, i64 multiplication in DF is not to spec.
+            // Therefore, we use a custom multiplication handler.
             template.call_function(DF_FUNC_I64_MUL, Args::default());
         }
         Operator::I32Mul => {
-            // I64Mul: Pops two values from the stack and pushes their product.
-            // stack: $a, $b -> $result
-
-            // We have to multiply by 1000 to get the correct DF scaling
-            // 1000 * (a / 1000) * (b / 1000) = a * (b / 1000) = (a * b) / 1000
-
-            template
-                .pop_op_stack(var("$b"))
-                .pop_op_stack(var("$a"))
-                .set_var_bitwise(
-                    "&",
-                    var("$res"),
-                    num("%math(1000 * %var($a) * %var($b))"),
-                    num(format_df_number_u32(0xFFFF_FFFFu32)),
-                )
-                .push_op_stack(var("$res"));
+            compile_binary_operator(template, "%math(1000*%var($a)*%var($b))", Some(u32::MAX));
         }
         Operator::I64DivS | Operator::I32DivU => {
-            template
-                .pop_op_stack(var("$b"))
-                .pop_op_stack(var("$a"))
-                .push_op_stack(num("%math(%var($a) / %var($b) / 1000)"));
+            compile_binary_operator(template, "%math(%var($a) / %var($b) / 1000)", None);
         }
         Operator::I32DivS => {
             template
@@ -334,10 +133,7 @@ pub fn compile_numeric_operator(
                 .push_op_stack(num("%math(%var($a) / %var($b) / 1000)"));
         }
         Operator::I64RemS | Operator::I32RemU => {
-            template
-                .pop_op_stack(var("$b"))
-                .pop_op_stack(var("$a"))
-                .push_op_stack(num("%math(%var($a) % %var($b))"));
+            compile_binary_operator(template, "%math(%var($a) % %var($b))", None);
         }
         Operator::I32RemS => {
             template
@@ -358,76 +154,23 @@ pub fn compile_numeric_operator(
                 )
                 .pop_op_stack(var("$a"))
                 .push_op_stack(num("%math(%var($a) % %var($b))"));
-            // .call_function(
-            //     DF_FUNC_SIGN_EXTEND,
-            //     Args::with(vec![
-            //         num(format_df_number_usize(64)),
-            //         num(format_df_number_usize(32)),
-            //     ]),
-            // );
         }
         Operator::I64And | Operator::I32And => {
-            // I64And: Pops two values from the stack and pushes their bitwise AND.
-            // stack: $a, $b -> $result
-
-            // no need to seperate 64 and 32 bit
-
-            template
-                .pop_op_stack(var("$b"))
-                .pop_op_stack(var("$a"))
-                .set_var_bitwise("&", var("$result"), var("$a"), var("$b"))
-                .push_op_stack(var("$result"));
+            compile_bitwise_operator(template, "&", None);
         }
         Operator::I64Or | Operator::I32Or => {
-            // I64Or: Pops two values from the stack and pushes their bitwise OR.
-            // stack: $a, $b -> $result
-
-            template
-                .pop_op_stack(var("$b"))
-                .pop_op_stack(var("$a"))
-                .set_var_bitwise("|", var("$result"), var("$a"), var("$b"))
-                .push_op_stack(var("$result"));
+            compile_bitwise_operator(template, "|", None);
         }
         Operator::I64Xor => {
-            // I64Xor: Pops two values from the stack and pushes their bitwise XOR.
-            // stack: $a, $b -> $result
-
-            template
-                .pop_op_stack(var("$b"))
-                .pop_op_stack(var("$a"))
-                .set_var_bitwise("^", var("$result"), var("$a"), var("$b"))
-                .push_op_stack(var("$result"));
+            compile_bitwise_operator(template, "^", None);
         }
         Operator::I32Xor => {
-            // I32Xor: Pops two values from the stack and pushes their bitwise XOR.
-            // stack: $a, $b -> $result
-
-            template
-                .pop_op_stack(var("$b"))
-                .pop_op_stack(var("$a"))
-                .set_var_bitwise("^", var("$result"), var("$a"), var("$b"))
-                .set_var_bitwise(
-                    "&",
-                    var("$result"),
-                    var("$result"),
-                    num(format_df_number_u32(0xFFFF_FFFFu32)),
-                )
-                .push_op_stack(var("$result"));
+            compile_bitwise_operator(template, "^", Some(u32::MAX));
         }
         Operator::I64Shl => {
-            // I64Shl: Pops two values from the stack and pushes the first value shifted left by the second value.
-            // stack: $a, $b -> $result
-
-            template
-                .pop_op_stack(var("$b"))
-                .pop_op_stack(var("$a"))
-                .set_var_bitwise("<<", var("$result"), var("$a"), var("$b"))
-                .push_op_stack(var("$result"));
+            compile_bitwise_operator(template, "<<", None);
         }
         Operator::I32Shl => {
-            // I64Shl: Pops two values from the stack and pushes the first value shifted left by the second value.
-            // stack: $a, $b -> $result
-
             template
                 .pop_op_stack(var("$b"))
                 .pop_op_stack(var("$a"))
@@ -442,19 +185,9 @@ pub fn compile_numeric_operator(
                 .push_op_stack(var("$result"));
         }
         Operator::I64ShrS => {
-            // I64ShrS: Pops two values from the stack and pushes the first value shifted right by the second value.
-            // stack: $a, $b -> $result
-
-            template
-                .pop_op_stack(var("$b"))
-                .pop_op_stack(var("$a"))
-                .set_var_bitwise(">>", var("$result"), var("$a"), var("$b"))
-                .push_op_stack(var("$result"));
+            compile_bitwise_operator(template, ">>", None);
         }
         Operator::I32ShrS => {
-            // I32ShrS: Pops two values from the stack and pushes the first value shifted right by the second value.
-            // stack: $a, $b -> $result
-
             template
                 .pop_op_stack(var("$b"))
                 .pop_op_stack(var("$a"))
@@ -463,14 +196,7 @@ pub fn compile_numeric_operator(
                 .push_op_stack(var("$result"));
         }
         Operator::I64ShrU => {
-            // I64ShrU: Pops two values from the stack and pushes the first value shifted right by the second value.
-            // stack: $a, $b -> $result
-
-            template
-                .pop_op_stack(var("$b"))
-                .pop_op_stack(var("$a"))
-                .set_var_bitwise(">>>", var("$result"), var("$a"), var("$b"))
-                .push_op_stack(var("$result"));
+            compile_bitwise_operator(template, ">>>", None);
         }
         Operator::I32ShrU => {
             // I32ShrU: Pops two values from the stack and pushes the first value shifted right by the second value.
@@ -484,68 +210,17 @@ pub fn compile_numeric_operator(
                 .push_op_stack(var("$result"));
         }
         Operator::I64Rotl => {
-            template
-                .pop_op_stack(var("$b"))
-                .pop_op_stack(var("$a"))
-                .set_var_bitwise("&", var("$b"), var("$b"), num(format_df_number_usize(0x3F))) // ensure $shift is 6 bits (0..=63);
-                .set_var_bitwise("<<", var("$lhs"), var("$a"), var("$b"))
-                .set_var_bitwise(
-                    ">>>",
-                    var("$rhs"),
-                    var("$a"),
-                    num("%math(0.064 - %var($b))"),
-                )
-                .set_var_bitwise("|", var("$result"), var("$lhs"), var("$rhs")) // ensure $result is 32 bits
-                .push_op_stack(var("$result"));
+            compile_rotate_operator(template, 64, false);
         }
         Operator::I64Rotr => {
-            template
-                .pop_op_stack(var("$b"))
-                .pop_op_stack(var("$a"))
-                .set_var_bitwise("&", var("$b"), var("$b"), num(format_df_number_usize(0x3F))) // ensure $shift is 6 bits (0..=63);
-                .set_var_bitwise(">>>", var("$lhs"), var("$a"), var("$b"))
-                .set_var_bitwise("<<", var("$rhs"), var("$a"), num("%math(0.064 - %var($b))"))
-                .set_var_bitwise("|", var("$result"), var("$lhs"), var("$rhs"))
-                .push_op_stack(var("$result"));
+            compile_rotate_operator(template, 64, true);
         }
         Operator::I32Rotl => {
-            template
-                .pop_op_stack(var("$b"))
-                .pop_op_stack(var("$a"))
-                .set_var_bitwise("&", var("$b"), var("$b"), num(format_df_number_usize(0x1F))) // ensure $shift is 5 bits (0..=31);
-                .set_var_bitwise("<<", var("$lhs"), var("$a"), var("$b"))
-                .set_var_bitwise(
-                    ">>>",
-                    var("$rhs"),
-                    var("$a"),
-                    num("%math(0.032 - %var($b))"),
-                )
-                .set_var_bitwise("|", var("$result"), var("$lhs"), var("$rhs"))
-                .set_var_bitwise(
-                    "&",
-                    var("$result"),
-                    var("$result"),
-                    num(format_df_number_u32(0xFFFF_FFFFu32)),
-                ) // ensure $result is 32 bits
-                .push_op_stack(var("$result"));
+            compile_rotate_operator(template, 32, false);
         }
         Operator::I32Rotr => {
-            template
-                .pop_op_stack(var("$b"))
-                .pop_op_stack(var("$a"))
-                .set_var_bitwise("&", var("$b"), var("$b"), num(format_df_number_usize(0x1F))) // ensure $shift is 5 bits (0..31);
-                .set_var_bitwise(">>>", var("$lhs"), var("$a"), var("$b"))
-                .set_var_bitwise("<<", var("$rhs"), var("$a"), num("%math(0.032 - %var($b))"))
-                .set_var_bitwise("|", var("$result"), var("$lhs"), var("$rhs"))
-                .set_var_bitwise(
-                    "&",
-                    var("$result"),
-                    var("$result"),
-                    num(format_df_number_u32(0xFFFF_FFFFu32)),
-                ) // ensure $result is 32 bits
-                .push_op_stack(var("$result"));
+            compile_rotate_operator(template, 32, true);
         }
-
         Operator::I32WrapI64 => {
             template
                 .pop_op_stack(var("$value"))
@@ -553,7 +228,7 @@ pub fn compile_numeric_operator(
                     "&",
                     var("$value"),
                     var("$value"),
-                    num(format_df_number_u32(0xFFFF_FFFFu32)),
+                    num(format_df_number_u32(u32::MAX)),
                 )
                 .push_op_stack(var("$value"));
         }
@@ -693,9 +368,139 @@ pub fn compile_numeric_operator(
         | Operator::I32ReinterpretF32
         | Operator::I64ReinterpretF64
         | Operator::F32ReinterpretI32
-        | Operator::F64ReinterpretI64 => todo!("floats"),
+        | Operator::F64ReinterpretI64 => {
+            return Err(DFWasmError::NotYetImplemented(
+                "floats are not supported yet",
+            ));
+        }
         _ => unreachable!("Invalid numeric operator: {operator:?}"),
     }
 
     Ok(())
+}
+
+fn compile_rotate_operator(template: &mut Template, bits: usize, is_right_shift: bool) {
+    let shift_mask = match bits {
+        32 => 0x1Fusize,
+        64 => 0x3Fusize,
+        _ => unreachable!("Invalid bit size: {bits}"),
+    };
+
+    template
+        .pop_op_stack(var("$b"))
+        .pop_op_stack(var("$a"))
+        .set_var_bitwise(
+            "&",
+            var("$b"),
+            var("$b"),
+            num(format_df_number_usize(shift_mask)),
+        ); // clamp $shift to 5 bits (0..=31) or 6 bits (0..=63)
+
+    if is_right_shift {
+        template
+            .set_var_bitwise(">>>", var("$lhs"), var("$a"), var("$b"))
+            .set_var_bitwise(
+                "<<",
+                var("$rhs"),
+                var("$a"),
+                num(format!("%math(0.0{bits} - %var($b))")),
+            );
+    } else {
+        template
+            .set_var_bitwise("<<", var("$lhs"), var("$a"), var("$b"))
+            .set_var_bitwise(
+                ">>>",
+                var("$rhs"),
+                var("$a"),
+                num(format!("%math(0.0{bits} - %var($b))")),
+            );
+    }
+
+    template.set_var_bitwise("|", var("$result"), var("$lhs"), var("$rhs"));
+    if bits == 32 {
+        template.set_var_bitwise(
+            "&",
+            var("$result"),
+            var("$result"),
+            num(format_df_number_usize(0xFFFF_FFFFusize)),
+        ); // ensure $result is 32 bits
+    }
+    template.push_op_stack(var("$result"));
+}
+
+fn compile_comparison_operator(
+    template: &mut Template,
+    action: &str,
+    sign_extend: bool,
+    xor: bool,
+) {
+    if sign_extend {
+        template.call_function(
+            DF_FUNC_SIGN_EXTEND,
+            Args::with(vec![
+                num(format_df_number_usize(32)),
+                num(format_df_number_usize(64)),
+            ]),
+        );
+    }
+    template.pop_op_stack(var("$b"));
+
+    if sign_extend {
+        template.call_function(
+            DF_FUNC_SIGN_EXTEND,
+            Args::with(vec![
+                num(format_df_number_usize(32)),
+                num(format_df_number_usize(64)),
+            ]),
+        );
+    }
+    template.pop_op_stack(var("$a"));
+
+    if xor {
+        template.set_var_bitwise(
+            "^",
+            var("$a"),
+            var("$a"),
+            num(format_df_number_i64(i64::MIN)),
+        );
+        template.set_var_bitwise(
+            "^",
+            var("$b"),
+            var("$b"),
+            num(format_df_number_i64(i64::MIN)),
+        );
+    }
+
+    template.compare_and_push(action, var("$a"), var("$b"));
+}
+
+fn compile_binary_operator(template: &mut Template, expr: &str, mask: Option<u32>) {
+    template.pop_op_stack(var("$b")).pop_op_stack(var("$a"));
+
+    let value = num(expr);
+
+    if let Some(mask) = mask {
+        template.set_var_bitwise("&", var("$res"), value, num(format_df_number_u32(mask)));
+        template.push_op_stack(var("$res"));
+    } else {
+        template.push_op_stack(value);
+    }
+}
+
+fn compile_bitwise_operator(template: &mut Template, operator: &str, mask: Option<u32>) {
+    template
+        .pop_op_stack(var("$b"))
+        .pop_op_stack(var("$a"))
+        .set_var_bitwise(operator, var("$res"), var("$a"), var("$b"));
+
+    if let Some(mask) = mask {
+        template.set_var_bitwise(
+            "&",
+            var("$res"),
+            var("$res"),
+            num(format_df_number_u32(mask)),
+        );
+    }
+
+    template.push_op_stack(var("$res"));
 }

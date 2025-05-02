@@ -18,7 +18,7 @@ mod df {
     }
 }
 
-const TAPE_SIZE: usize = 10;
+const TAPE_SIZE: usize = 100;
 
 struct Program<'a> {
     code: &'a [u8],
@@ -49,46 +49,50 @@ impl<'a> Program<'a> {
             b'<' => {
                 self.tape_ptr = (self.tape_ptr.wrapping_sub(1)) % TAPE_SIZE;
             }
-            b'+' => unsafe {
-                *self.tape.get_unchecked_mut(self.tape_ptr) =
-                    self.tape.get_unchecked(self.tape_ptr).wrapping_add(1);
-            },
-            b'-' => unsafe {
-                *self.tape.get_unchecked_mut(self.tape_ptr) =
-                    self.tape.get_unchecked(self.tape_ptr).wrapping_sub(1);
-            },
-            b'.' => unsafe {
-                df::putc(*self.tape.get_unchecked(self.tape_ptr));
-            },
+            b'+' => {
+                if let Some(val) = self.tape.get_mut(self.tape_ptr) {
+                    *val = val.wrapping_add(1);
+                }
+            }
+            b'-' => {
+                if let Some(val) = self.tape.get_mut(self.tape_ptr) {
+                    *val = val.wrapping_sub(1);
+                }
+            }
+            b'.' => {
+                if let Some(val) = self.tape.get(self.tape_ptr) {
+                    df::putc(*val);
+                }
+            }
             b',' => {
                 // Input handling is not implemented
             }
-            b'[' => unsafe {
-                if *self.tape.get_unchecked(self.tape_ptr) == 0 {
+            b'[' => {
+                if self.tape.get(self.tape_ptr).copied() == Some(0) {
                     let mut bracket_count = 1;
                     while bracket_count > 0 && self.pc < self.code.len() - 1 {
                         self.pc += 1;
-                        if *self.code.get_unchecked(self.pc) == b'[' {
+                        if self.code.get(self.pc).copied() == Some(b'[') {
                             bracket_count += 1;
-                        } else if *self.code.get_unchecked(self.pc) == b']' {
+                        } else if self.code.get(self.pc).copied() == Some(b']') {
                             bracket_count -= 1;
                         }
                     }
                 }
-            },
-            b']' => unsafe {
-                if *self.tape.get_unchecked(self.tape_ptr) != 0 {
+            }
+            b']' => {
+                if self.tape.get(self.tape_ptr).copied() != Some(0) {
                     let mut bracket_count = 1;
                     while bracket_count > 0 && self.pc > 0 {
                         self.pc -= 1;
-                        if *self.code.get_unchecked(self.pc) == b']' {
+                        if self.code.get(self.pc).copied() == Some(b']') {
                             bracket_count += 1;
-                        } else if *self.code.get_unchecked(self.pc) == b'[' {
+                        } else if self.code.get(self.pc).copied() == Some(b'[') {
                             bracket_count -= 1;
                         }
                     }
                 }
-            },
+            }
             _ => {}
         }
 

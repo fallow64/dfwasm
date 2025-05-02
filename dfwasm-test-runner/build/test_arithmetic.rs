@@ -5,14 +5,14 @@ use crate::{
     numbers::{I32_1, I32_2, I64_1, I64_2},
     write_test,
 };
-use Type::*;
+use Type::{I32, I64};
 
 type Instruction = (&'static str, &'static [Type], &'static [Type]);
 type TestCase = &'static [&'static str];
 
-fn build_airhtmetic_instruction_test(instruction: &Instruction, tests: &[TestCase]) {
-    let function_name = instruction.0.replace(".", "_");
-    let module_name = format!("single-{}", function_name);
+fn build_arithmetic_instruction_test(instruction: &Instruction, tests: &[TestCase]) {
+    let function_name = instruction.0.replace('.', "_");
+    let module_name = format!("single-{function_name}");
 
     let instr_asm = instruction.0;
     let instr_args = instruction.1;
@@ -61,7 +61,7 @@ fn build_airhtmetic_instruction_test(instruction: &Instruction, tests: &[TestCas
             .collect::<Vec<_>>()
             .join(" ");
 
-        test_file.push_str(&format!("{} {}\n", function_name, call_args));
+        test_file.push_str(&format!("{function_name} {call_args}\n"));
     }
 
     write_test(
@@ -119,7 +119,7 @@ fn build_i32() {
                 instruction.0
             ),
         };
-        build_airhtmetic_instruction_test(&instruction, tests);
+        build_arithmetic_instruction_test(&instruction, tests);
     }
 }
 
@@ -169,7 +169,7 @@ fn build_i64() {
                 instruction.0
             ),
         };
-        build_airhtmetic_instruction_test(&instruction, tests);
+        build_arithmetic_instruction_test(&instruction, tests);
     }
 }
 

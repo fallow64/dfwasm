@@ -12,7 +12,6 @@ use test_builder::compile_module_from_path;
 use util::CompiledModuleTest;
 
 pub const PLOT_SIZE: usize = 301;
-// todo: CLI Args for this?
 pub const TEST_COMPILER_OPTIONS: DFWasmCompilerOptions = DFWasmCompilerOptions {
     module_name: None,
     debugger: false,
