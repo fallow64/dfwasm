@@ -31,6 +31,10 @@ pub fn split_templates(templates: Vec<Template>, max_size: usize) -> Vec<Templat
             continue;
         }
 
+        dbg!(&template.get_name());
+        dbg!(&template.blocks.len());
+        dbg!(&template.encode());
+
         // Get the new name of the template
         let new_function_name = match template.blocks.first() {
             Some(Block::Function { args, name }) => {
@@ -84,12 +88,8 @@ fn find_last_global_scope(blocks: &[Block], max_size: usize) -> usize {
 
     for (i, block) in blocks.iter().enumerate() {
         match block {
-            Block::IfEntity { .. }
-            | Block::IfGame { .. }
-            | Block::IfPlayer { .. }
-            | Block::IfVariable { .. }
-            | Block::Else => {
-                // Skip these blocks, cannot split here
+            Block::Else => {
+                // An else cannot be split
             }
             Block::Bracket { direction, .. } => match direction {
                 BracketDirection::Open => bracket_depth += 1,

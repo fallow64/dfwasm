@@ -229,7 +229,7 @@ pub fn string(value: impl Into<String>) -> Item {
 /// The DF variable representing the operand stack. This is a list, so technically the max stack size is 10K.
 pub const DF_VAR_OP_STACK: &str = "wasm.$op_stack";
 /// The DF variable representing the current memory size.
-pub const DF_VAR_MEM_SIZE: &str = "wasm.$memSize";
+pub const DF_VAR_MEM_SIZE: &str = "wasm.$mem_size";
 
 /// The DF variable representing the function store (i.e. a list of all of the compiled function names or imported functions).
 pub const DF_VAR_STORE_FUNCS: &str = "wasm.$store_funcs";

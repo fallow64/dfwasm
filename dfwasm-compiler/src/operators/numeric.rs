@@ -73,8 +73,13 @@ pub fn compile_numeric_operator(
         Operator::I64GeU | Operator::I32GeU => {
             compile_comparison_operator(template, ">=", false, true);
         }
-        Operator::I64Clz | Operator::I32Clz => todo!(),
-        Operator::I64Ctz | Operator::I32Ctz => todo!(),
+        Operator::I64Clz | Operator::I32Clz => {}
+        Operator::I64Ctz => {
+            compile_ctz_operator(template, 64);
+        }
+        Operator::I32Ctz => {
+            compile_ctz_operator(template, 32);
+        }
         Operator::I64Popcnt | Operator::I32Popcnt => todo!(),
         Operator::I64Add => {
             compile_binary_operator(template, "%math(%var($a)+%var($b))", None);
@@ -503,4 +508,59 @@ fn compile_bitwise_operator(template: &mut Template, operator: &str, mask: Optio
     }
 
     template.push_op_stack(var("$res"));
+}
+
+fn compile_ctz_operator(template: &mut Template, bits: usize) {
+    template
+        .pop_op_stack(var("$value"))
+        .set_var(
+            "=",
+            Args::with(vec![var("$count"), num(format_df_number_usize(0))]),
+        )
+        .if_var(
+            "=",
+            Args::with(vec![var("$value"), num(format_df_number_usize(0))]),
+        )
+        .open_bracket()
+        .set_var(
+            "=",
+            Args::with(vec![var("$count"), num(format_df_number_usize(bits))]),
+        )
+        .close_bracket()
+        .else_block()
+        .open_bracket()
+        .repeat("Forever", Args::default())
+        .open_bracket_repeat()
+        .set_var_bitwise(
+            "&",
+            var("$cond"),
+            var("$value"),
+            num(format_df_number_usize(1)),
+        )
+        .if_var(
+            "=",
+            Args::with(vec![var("$cond"), num(format_df_number_usize(1))]),
+        )
+        .open_bracket()
+        .control("StopRepeat", Args::default())
+        .close_bracket()
+        .set_var(
+            "+=",
+            Args::with(vec![var("$count"), num(format_df_number_usize(1))]),
+        )
+        .set_var_bitwise(
+            "&",
+            var("$cond"),
+            var("$value"),
+            num(format_df_number_usize(1)),
+        )
+        .set_var_bitwise(
+            ">>>",
+            var("$value"),
+            var("$value"),
+            num(format_df_number_usize(1)),
+        )
+        .close_bracket()
+        .close_bracket_repeat()
+        .push_op_stack(var("$count"));
 }
